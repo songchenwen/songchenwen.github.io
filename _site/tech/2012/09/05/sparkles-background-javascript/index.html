@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Sparkles Background &middot; 宋辰文
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/highlight/styles/monokai_sublime.css">
+  <link rel="stylesheet" href="/public/css/lanyon.css">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body class="layout-reverse sidebar-overlay">
+
+    <!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
+     styles, `#sidebar-checkbox` for behavior. -->
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+<!-- Toggleable sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>宋辰文<br />Android & iOS 开发者<br />比太钱包联合创始人</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item" href="/">Home</a>
+
+    
+
+    
+    
+      
+        
+      
+    
+      
+        
+      
+    
+      
+    
+      
+        
+      
+    
+      
+        
+      
+    
+      
+        
+          <a class="sidebar-nav-item" href="/projects/">Projects</a>
+        
+      
+    
+
+    <a class="sidebar-nav-item" href="/atom.xml" target="_blank">Feed</a>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>
+      &copy; 2015. All rights reserved.
+    </p>
+  </div>
+</div>
+
+
+    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+         content to avoid any CSS collisions with our real content. -->
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h3 class="masthead-title">
+            <a href="/" title="Home">宋辰文</a>
+            <small>的博客</small>
+          </h3>
+        </div>
+      </div>
+
+      <div class="container content">
+        <div class="post">
+  <h1 class="post-title">Sparkles Background</h1>
+  <span class="post-date">05 Sep 2012</span>
+  <p><img src="/images/sparkles-background-javascript/1.jpg" alt="" /></p>
+
+<!-- more -->
+
+<h1 id="js">背景圆球飘动效果的JS</h1>
+<pre><code class="language-javascript">	var Spark = function () {
+	    var a = this;;
+	    this.n = document.createElement("div");
+	    this.caculateStyle().newSpeed().newPoint().
+			display().newPoint().fly()
+	};
+	Spark.prototype.display = function () {
+	    $(this.n).attr("style", this.style).
+			css("position", "absolute").css("z-index", -1).
+				css("top", this.pointY).
+					css("left", this.pointX);
+	    $('#background').append(this.n);
+	    return this
+	};
+	Spark.prototype.caculateStyle= function(){
+		var size = this.random(18) + 2;
+		var alpha = 0.2 + 0.8 * 2/size;
+		var shadowAlpha = alpha*2;
+		this.style = "border-radius: 50%;";
+		this.style = this.style	+ "width:" + size + 
+			"px;height:" + size + "px;";
+		this.style = this.style + "box-shadow:0 0 " + 
+			size+"px rgba(255,255,255,"+ shadowAlpha +");";
+		this.style = this.style + "background-color:" + 
+			"rgba(255,255,255,"+ alpha +");";
+		return this;
+	}
+	Spark.prototype.fly = function () {
+	    var a = this;
+	    $(this.n).animate({
+	        top: this.pointY,
+	        left: this.pointX
+	    }, this.speed, "linear", function () {
+	        a.newSpeed().newPoint().fly()
+	    })
+	};
+	Spark.prototype.newSpeed = function () {
+	    this.speed = (this.random(10) + 5) * 1100;
+	    return this
+	};
+	Spark.prototype.newPoint = function () {
+	    this.pointX = this.random(window.innerWidth - 100) + 50;
+	    this.pointY = this.random(window.innerHeight - 100) + 50;
+	    return this
+	};
+	Spark.prototype.random = function (a) {
+	    return Math.ceil(Math.random() * a) - 1
+	};
+	$(function () {
+	    if ($.browser.msie &amp;&amp; $.browser.version &lt; 9) {
+	        return
+	    }
+	    var a = 20;
+	    var b = [];
+	    for (i = 0; i &lt; a; i++) {
+	        b[i] = new Spark()
+	    }
+	});
+</code></pre>
+
+<p><a href="/downloads/code/js/sparkles.js" target="_blank">Download</a></p>
+
+</div>
+
+<div id="disqus_thread" style="margin-top:1em"></div>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script type="text/javascript" src="http://garyblog.disqus.com/embed.js"></script>
+
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+    
+    <script>
+  (function(document) {
+    var toggle = document.querySelector('.sidebar-toggle');
+    var sidebar = document.querySelector('#sidebar');
+    var checkbox = document.querySelector('#sidebar-checkbox');
+
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+
+      if(!checkbox.checked ||
+         sidebar.contains(target) ||
+         (target === checkbox || target === toggle)) return;
+
+      checkbox.checked = false;
+    }, false);
+  })(document);
+</script>
+
+<script type="text/javascript" src="/public/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+  </body>
+</html>

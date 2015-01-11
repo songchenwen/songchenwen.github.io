@@ -1,0 +1,1511 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+ <title>宋辰文</title>
+ <link href="http://songchenwen.github.io/atom.xml" rel="self"/>
+ <link href="http://songchenwen.github.io/"/>
+ <updated>2015-01-11T13:36:25+08:00</updated>
+ <id>http://songchenwen.github.io</id>
+ <author>
+   <name>宋辰文</name>
+   <email>emptyzone0@gmail.com</email>
+ </author>
+
+ 
+ <entry>
+   <title>iOS8 不越狱翻墙方案</title>
+   <link href="http://songchenwen.github.io/tech/2014/10/13/cross-fire-wall-on-ios8/"/>
+   <updated>2014-10-13T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/tech/2014/10/13/cross-fire-wall-on-ios8</id>
+   <content type="html">&lt;blockquote&gt;
+  &lt;p&gt;iOS8为我们带来了第三方输入法和 App Extentions，越狱的需求越来越少。而且自从在 &lt;a href=&quot;http://bither.net&quot;&gt;Bither&lt;/a&gt; 里存了一些比特币之后，我就越来越关注手机系统的安全性。现在真的是能不越狱就尽量不越了。那么不越狱的话怎么满足我自由的访问互联网的需求呢？
+OS X，PC 或者 Android 翻墙，请移步 &lt;a href=&quot;http://github.com/clowwindy/shadowsocks&quot;&gt;Shadowsocks&lt;/a&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;我目前在 iPhone 上所用的翻墙方案包含如下两部分 ：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;自动连接并区分墙内外流量的IPsec VPN&lt;/li&gt;
+  &lt;li&gt;避开GFW污染，并尽量就近解析域名的DNS&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;以下步骤需要你有自己的 VPS。
+以下操作基于 Ubuntu，以非 root 用户 ssh 登录。其它发行版应该只有包管理和防火墙部分稍有不同。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h1 id=&quot;ipsec-vpn&quot;&gt;IPsec VPN&lt;/h1&gt;
+
+&lt;p&gt;我是在 &lt;a href=&quot;https://twitter.com/emptyzone0&quot;&gt;Twitter&lt;/a&gt; 上看到 &lt;a href=&quot;https://twitter.com/Cattyhouse&quot;&gt;Justin&lt;/a&gt; 说 Anyconnect 在 iOS8 上变的特别慢之后，才开始考虑停掉 &lt;a href=&quot;http://www.infradead.org/ocserv/&quot;&gt;ocserv&lt;/a&gt; 换用 IPsec VPN 的，IPsec 的配置方法参考了 &lt;a href=&quot;https://twitter.com/Cattyhouse&quot;&gt;Justin&lt;/a&gt; 的&lt;a href=&quot;https://medium.com/@cattyhouse/ios-ondemand-ipsec-vpn-setup-ebfb82b6f7a1&quot;&gt;文章&lt;/a&gt;。由于 IKEv2 在 iOS8 上有 &lt;a href=&quot;http://www.v2ex.com/t/138171&quot;&gt;Bug&lt;/a&gt;，所以这里还是用的 IKEv1 协议。不过如果 Apple 在哪个版本修复了 IKEv2 的话，现在这个配置方式也是很容易迁移到 IKEv2 的。&lt;/p&gt;
+
+&lt;h2 id=&quot;strongswan&quot;&gt;编译 Strongswan&lt;/h2&gt;
+
+&lt;p&gt;apt-get 里的 Strongswan 版本低，所以这里需要自行编译最新版的 Strongswan。&lt;/p&gt;
+
+&lt;h3 id=&quot;section&quot;&gt;检查依赖&lt;/h3&gt;
+&lt;p&gt;如果是基于 OpenVZ 的 VPS 的话，先要检查一下有没有 TUN Device。输入下面的命令。非 OpenVZ 可以跳过这一步。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cat /dev/net/tun
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如果执行结果如下，那么就可以安装 Strongswan 了。否则的话，去给 VPS 提供商发 Ticket 看能不能解决吧。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;cat: /dev/net/tun: File descriptor in bad state
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;下载源码&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;wget http://download.strongswan.org/strongswan.tar.gz &amp;amp;&amp;amp; tar zxvf strongswan* 
+cd strongswan*
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;### 安装编译所需的包&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;sudo apt-get build-dep strongswan
+sudo apt-get install libgmp3-dev openssl  libssl-dev
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;section-2&quot;&gt;编译&lt;/h3&gt;
+&lt;p&gt;Strongswan 在 &lt;code&gt;configure&lt;/code&gt; 时要对 OpenVZ 特殊处理。&lt;/p&gt;
+
+&lt;p&gt;非 OpenVZ 执行如下命令。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;./configure --sysconfdir=/etc --disable-sql --disable-mysql --disable-ldap --enable-dhcp --enable-eap-identity --enable-eap-mschapv2 --enable-md4 --enable-xauth-eap --enable-eap-peap --enable-eap-md5 --enable-openssl --enable-shared --enable-unity --enable-eap-tls   --enable-eap-ttls --enable-eap-tnc --enable-eap-dynamic --enable-addrblock --enable-radattr --enable-nat-transport --enable-kernel-netlink
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;OpenVZ 要加上 &lt;code&gt;--enable-kernel-libipsec&lt;/code&gt; 参数，完整命令如下。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;./configure --sysconfdir=/etc --disable-sql --disable-mysql --disable-ldap --enable-dhcp --enable-eap-identity --enable-eap-mschapv2 --enable-md4 --enable-xauth-eap --enable-eap-peap --enable-eap-md5 --enable-openssl --enable-shared --enable-unity --enable-eap-tls   --enable-eap-ttls --enable-eap-tnc --enable-eap-dynamic --enable-addrblock --enable-radattr --enable-nat-transport --enable-kernel-netlink --enable-kernel-libipsec
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;configure&lt;/code&gt; 完之后就可以 &lt;code&gt;make&lt;/code&gt; 和 &lt;code&gt;install&lt;/code&gt; 了&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;make &amp;amp;&amp;amp; sudo make install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;生成证书&lt;/h2&gt;
+
+&lt;p&gt;这里是使用的自签名证书，需要你把 CA 证书用邮件发到 iOS 设备上安装才行。如果要用 ssl 证书，可以参考 &lt;a href=&quot;https://twitter.com/wzxjohn&quot;&gt;wzxjohn&lt;/a&gt; 的&lt;a href=&quot;http://maoxian.de/2014/10/setup-ikev2-on-demand-vpn-on-ios-8-and-ikev2-ikev1-cisco-ipsec-vpn-with-strongswan/1220.html&quot;&gt;文章&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;Strongswan 的证书都是要放在 &lt;code&gt;/etc/ipsec.d/&lt;/code&gt; 里的，不过我们是非 root 登录的，不方便直接操作这个目录，可以现在 home 目录下新建个目录来生成证书，等都生成好了再复制到 &lt;code&gt;/etc/ipsec.d/&lt;/code&gt; 就行了。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;mkdir ~/ipsec_cert &amp;amp;&amp;amp; cd ~/ipsec_cert
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;生成证书用到的命令比较多，我写好了 script 来做这件事&lt;/p&gt;
+
+&lt;h3 id=&quot;section-4&quot;&gt;生成服务器证书&lt;/h3&gt;
+&lt;p&gt;记得把我这里写的 &lt;code&gt;emptyzone.github.io&lt;/code&gt; 换成你自己的 Server IP 或者是域名。你打算用域名访问 VPN 就写 域名，打算用 IP 访问就写 IP，别写错了。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;wget https://gist.githubusercontent.com/songchenwen/14c1c663ea65d5d4a28b/raw/cef8d8bafe6168388b105f780c442412e6f8ede7/server_key.sh
+sh server_key.sh emptyzone.github.io
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;section-5&quot;&gt;生成客户端证书&lt;/h3&gt;
+&lt;p&gt;把 &lt;code&gt;gary&lt;/code&gt; 和 &lt;code&gt;gary@gmail.com&lt;/code&gt; 换成你自己的用户名和email。这个脚本执行完会生成好导入 iOS 时需要的 &lt;code&gt;p12&lt;/code&gt; 证书文件，最后提示你输入的密码就是用来加密它的，在往 iOS 导入时输入相同的即可。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;wget https://gist.githubusercontent.com/songchenwen/14c1c663ea65d5d4a28b/raw/54843ae2e5e6d1159134cd9a90a08c31ff5a253d/client_key.sh
+sh client_key.sh gary gary@gmail.com
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;执行完成后可以把以用户名开头的 &lt;code&gt;.p12&lt;/code&gt; 文件 和 &lt;code&gt;cacerts/strongswanCert.pem&lt;/code&gt; 下载到本地来备用。&lt;/p&gt;
+
+&lt;h3 id=&quot;etcipsecd&quot;&gt;复制证书到  &lt;code&gt;/etc/ipsec.d/&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;Strongswan 需要的是 &lt;code&gt;cacerts/strongswanCert.pem&lt;/code&gt; &lt;code&gt;certs/vpnHostCert.pem&lt;/code&gt; &lt;code&gt;private/vpnHostKey.pem&lt;/code&gt; 这三个文件。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;sudo cp cacerts/strongswanCert.pem /etc/ipsec.d/cacerts/strongswanCert.pem 
+sudo cp certs/vpnHostCert.pem /etc/ipsec.d/certs/vpnHostCert.pem
+sudo cp private/vpnHostKey.pem /etc/ipsec.d/private/vpnHostKey.pem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;strongswan-1&quot;&gt;配置 Strongswan&lt;/h2&gt;
+
+&lt;h3 id=&quot;etcipsecconf&quot;&gt;编辑 /etc/ipsec.conf&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;sudo vi /etc/ipsec.conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;config setup
+	# strictcrlpolicy=yes
+	#  uniqueids = replace
+	# charondebug=&quot;cfg 2, dmn 2, ike 2, net 0&quot; #要看Log时，取消注释本行
+
+conn %default
+	keyexchange=ikev1
+	dpdaction=hold
+	dpddelay=600s
+	dpdtimeout=5s
+	lifetime=24h
+	ikelifetime=240h
+	rekey=no
+	left=emptyzone.github.io #这里换成你登录 VPN 用的域名或 IP，与生成证书时相同 
+	leftsubnet=0.0.0.0/0
+	leftcert=vpnHostCert.pem
+	leftsendcert=always
+	right=%any
+	rightdns=8.8.8.8
+	rightsourceip=10.0.0.0/8
+
+conn CiscoIPSec
+	rightauth=pubkey
+	rightauth2=xauth
+	auto=add
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;etcipsecsecrets&quot;&gt;编辑 /etc/ipsec.secrets&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;sudo vi /etc/ipsec.secrets
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;#验证用户所需的信息
+#用户名 : EAP &quot;密码&quot;
+: RSA vpnHostKey.pem
+gary : EAP &quot;strongpassword&quot; 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;iptables&quot;&gt;配置防火墙 iptables&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;参考我的配置文件，重要的是开启 NAT 转发 开放 &lt;code&gt;4500&lt;/code&gt; &lt;code&gt;500&lt;/code&gt; 端口和 &lt;code&gt;esp&lt;/code&gt; 协议&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;/etc/iptables.firewall.rules&lt;/p&gt;
+
+&lt;p&gt;注意别把自己的 ssh 端口关闭了&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;*filter
+
+#  Allow all loopback (lo0) traffic and drop all traffic to 127/8 that doesn&#39;t use lo0
+-A INPUT -i lo -j ACCEPT
+-A INPUT -d 127.0.0.0/8 -j LOG --log-prefix &quot;looback denied: &quot; --log-level 7
+-A INPUT -d 127.0.0.0/8 -j REJECT
+
+#  Accept all established inbound connections
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+#  Allow all outbound traffic - you can modify this to only allow certain traffic
+-A OUTPUT -j ACCEPT
+
+#  Allow HTTP and HTTPS connections from anywhere (the normal ports for websites and SSL).
+-A INPUT -p tcp --dport 80 -j ACCEPT
+
+# Allow ipsec
+-A INPUT -p udp --dport 4500 --j ACCEPT
+-A INPUT -p udp --dport 500 --j ACCEPT
+-A INPUT -p esp -j ACCEPT
+
+#  Allow SSH connections
+#
+#  The -dport number should be the same port number you set in sshd_config
+#
+-A INPUT -p tcp -m state --state NEW --dport 1010 -j ACCEPT
+
+#  Allow ping
+-A INPUT -p icmp -j ACCEPT
+
+#  Log iptables denied calls
+-A INPUT -m limit --limit 5/min -j LOG --log-prefix &quot;iptables denied: &quot; --log-level 7
+
+-A INPUT -j DROP
+
+COMMIT
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在 &lt;code&gt;/etc/sysctl.conf&lt;/code&gt; 中开启 &lt;code&gt;net.ipv4.ip_forward=1&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;编辑 &lt;code&gt;/etc/network/if-pre-up.d/firewall&lt;/code&gt;
+~~~ bash
+ #!/bin/sh 
+/sbin/iptables-restore &amp;lt; /etc/iptables.firewall.rules
+~~~&lt;/p&gt;
+
+&lt;p&gt;执行
+~~~ bash
+sudo chmod +x /etc/network/if-pre-up.d/firewall
+~~~&lt;/p&gt;
+
+&lt;p&gt;编辑 &lt;code&gt;/etc/rc.local&lt;/code&gt; 在 &lt;code&gt;exit 0&lt;/code&gt; 前加上，&lt;code&gt;20.16.3.18&lt;/code&gt; 换成你的服务器 IP。
+~~~ bash
+iptables -t nat -A POSTROUTING -j MASQUERADE
+iptables -A FORWARD -p tcp –tcp-flags SYN,RST SYN -j TCPMSS –clamp-mss-to-pmtu
+iptables -A POSTROUTING -t nat -s 10.0.0.0/8 -j SNAT –to-source 20.16.3.18
+~~~&lt;/p&gt;
+
+&lt;p&gt;现在可以重启一下服务器，然后执行 &lt;code&gt;sudo iptables -L&lt;/code&gt;，看看防火墙有没有添加对。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-6&quot;&gt;区分流量自动路由&lt;/h2&gt;
+
+&lt;p&gt;是的，你没看错，IPsec IKEv1 也是支持自动路由的。IPsec 支持 &lt;a href=&quot;https://wiki.strongswan.org/projects/strongswan/wiki/ForwardingAndSplitTunneling&quot;&gt;SplitTunneling&lt;/a&gt;。iOS 上的 IPsec 客户端用的是 Racoon，这货支持 Unity Plugin。也就是说我们可以用 IP 列表来区分国内外流量了。&lt;/p&gt;
+
+&lt;p&gt;但是当启用了 &lt;code&gt;SplitTunneling&lt;/code&gt; 之后，iOS 端就不会使用我们在服务器端配置的 DNS 了，所以我们还需要利用 Unity Plugin 的 &lt;code&gt;Split DNS&lt;/code&gt; 来把抗干扰的 DNS 推给客户端。&lt;/p&gt;
+
+&lt;p&gt;IP 列表可能会经常维护，所以我希望把它和主配置文件分开放置。放在我的 &lt;code&gt;home&lt;/code&gt; 目录里就好了。&lt;/p&gt;
+
+&lt;h3 id=&quot;etcstrongswanconf&quot;&gt;修改 /etc/strongswan.conf&lt;/h3&gt;
+
+&lt;p&gt;在文件最后加上一句 &lt;code&gt;include /home/gary/ipsec_config/*.conf&lt;/code&gt; ，&lt;code&gt;gary&lt;/code&gt; 换成你的 ssh 用户名，这样strongswan 就会导入我的 &lt;code&gt;~/ipsec_config&lt;/code&gt; 目录下的所有 &lt;code&gt;.conf&lt;/code&gt; 文件。&lt;/p&gt;
+
+&lt;h3 id=&quot;ip-&quot;&gt;添加 IP 列表配置&lt;/h3&gt;
+
+&lt;p&gt;这是我现在用的 IP 列表，目前除了 Instagram 经常有图片下载不下来以外，没有别的问题。这个 IP 列表 iOS 端估计是有数量上限的。我测试的结果是当数量大于160时，iOS 端会返回 &lt;code&gt;IKE DELETE&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;28675&lt;/code&gt; 是 &lt;code&gt;Split DNS&lt;/code&gt; 的 Key，我这里用上了 GFWList 中的所有顶级域名。&lt;/p&gt;
+
+&lt;p&gt;创建并编辑 &lt;code&gt;~/ipsec_config/attr.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;charon {
+  plugins {
+    attr {
+
+	split-include = 63.140.32.0/19, 66.117.16.0/20, 66.235.0.0/16, 130.248.0.0/16, 153.32.0.0/16, 185.34.188.0/22, 192.147.117.0/24, 192.150.0.0/16, 192.243.224.0/20, 192.243.248.0/21, 193.104.215.0/24, 195.35.86.0/24, 208.77.136.0/22, 216.104.0.0/16, 8.18.144.0/23, 23.20.0.0/14, 27.0.0.0/22, 46.51.128.0/18, 46.51.192.0/20, 46.51.216.0/21, 46.51.224.0/19, 46.137.0.0/17, 46.137.128.0/18, 46.137.224.0/19, 50.16.0.0/14, 50.112.0.0/16, 54.0.0.0/8, 67.202.0.0/18, 72.21.192.0/19, 72.44.32.0/19, 75.101.128.0/17, 79.125.0.0/17, 87.238.80.0/21, 96.127.0.0/17, 103.246.148.0/22, 107.20.0.0/14, 122.248.192.0/18, 174.129.0.0/16, 176.32.64.0/19, 176.34.0.0/16, 178.236.0.0/20, 184.72.0.0/15, 184.169.128.0/17, 184.154.0.0/16, 185.48.120.0/22, 199.0.0.0/8, 203.83.220.0/22, 204.236.128.0/17, 204.246.160.0/20, 204.246.176.0/22, 204.246.180.0/23, 204.246.182.0/24, 204.246.184.0/21, 205.251.192.0/19, 205.251.224.0/20, 205.251.240.0/21, 205.251.248.0/22, 205.251.252.0/23, 205.251.254.0/24, 207.171.160.0/19, 216.137.32.0/21, 216.137.40.0/22, 216.137.44.0/23, 216.137.48.0/20, 216.182.224.0/20, 17.0.0.0/8, 63.92.224.0/19, 192.12.74.0/24, 192.42.249.0/24, 204.79.190.0/24, 104.16.0.0/12, 108.162.192.0/19, 108.162.224.0/20, 108.162.240.0/21, 108.162.248.0/22, 108.162.252.0/23, 108.162.254.0/24, 162.158.0.0/15, 173.245.48.0/20, 198.41.128.0/17, 204.93.177.0/24, 108.160.160.0/20, 205.189.0.0/24, 37.48.64.0/18, 85.17.0.0/16, 95.211.0.0/16, 31.13.24.0/21, 31.13.64.0/18, 66.220.144.0/20, 69.63.176.0/20, 69.171.224.0/19, 74.119.76.0/22, 173.252.64.0/18, 204.15.20.0/22, 23.235.32.0/20, 104.156.80.0/20, 208.71.104.0/22, 192.30.252.0/22, 8.6.48.0/21, 8.8.4.0/24, 8.8.8.0/24, 8.15.202.0/24, 8.34.208.0/20, 8.35.192.0/20, 23.236.48.0/20, 23.251.128.0/19, 64.9.224.0/19, 64.233.160.0/19, 66.102.0.0/20, 66.249.64.0/19, 70.32.128.0/19, 72.14.192.0/18, 74.125.0.0/16, 104.132.0.0/14, 104.154.0.0/15, 104.196.0.0/14, 107.167.160.0/19, 107.178.192.0/18, 108.59.80.0/20, 108.170.192.0/18, 108.177.0.0/17, 130.211.0.0/16, 142.250.0.0/15, 146.148.0.0/17, 162.216.148.0/22, 162.222.176.0/21, 172.217.0.0/16, 172.253.0.0/16, 173.194.0.0/16, 173.255.112.0/20, 192.158.28.0/22, 192.178.0.0/15, 207.223.160.0/20, 209.85.128.0/17, 216.58.192.0/19, 216.239.32.0/19, 205.196.120.0/22, 8.25.0.0/16, 192.133.76.0/22, 93.184.216.0/24, 59.24.3.0/24, 91.198.174.0/24, 185.15.56.0/22, 198.35.26.0/23, 198.73.209.0/24, 208.80.152.0/22, 66.155.8.0/21, 76.74.248.0/21, 192.0.64.0/18, 198.181.116.0/22
+
+      28675 = mil com tv fm za tw org info biz ca net ru au us de hk jp me uk io is it in li gov ly fr nu st asia im my xxx tk eu cc mobi se edu il kr ie ar nl cm ua es ph bz br be mp cz name lu ch su to no co nz sg ma vc am at la sh tl gd sk id pl mo tc hu
+
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;现在可以执行 &lt;code&gt;sudo ipsec start --nofork&lt;/code&gt;，试一下了。&lt;code&gt;--nofork&lt;/code&gt; 参数会让 strongswan 在前台运行，调试时加上就可以了，平时就让它在后台运行吧。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-7&quot;&gt;开机自启&lt;/h2&gt;
+
+&lt;p&gt;编辑 &lt;code&gt;/etc/rc.local&lt;/code&gt; 在 &lt;code&gt;exit 0&lt;/code&gt; 前加上 &lt;code&gt;ipsec start&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h2 id=&quot;ios-&quot;&gt;iOS 端自动配置文件&lt;/h2&gt;
+
+&lt;p&gt;这里完全参考 &lt;a href=&quot;https://twitter.com/Cattyhouse&quot;&gt;Justin&lt;/a&gt; 的&lt;a href=&quot;https://medium.com/@cattyhouse/ios-ondemand-ipsec-vpn-setup-ebfb82b6f7a1&quot;&gt;文章&lt;/a&gt;就可以了，他那有截图，我就只说一下步骤吧。&lt;/p&gt;
+
+&lt;p&gt;用 Apple Configurator 创建配置描述文件。&lt;/p&gt;
+
+&lt;p&gt;通用里的名称和标识符自己填好。&lt;/p&gt;
+
+&lt;p&gt;凭证里导入刚才下载好的客户端 &lt;code&gt;.p12&lt;/code&gt; 证书。&lt;/p&gt;
+
+&lt;p&gt;VPN里连接类型选 &lt;code&gt;IPsec(Cisco)&lt;/code&gt;，机器鉴定选证书，在下面选中刚才导入的证书。&lt;/p&gt;
+
+&lt;p&gt;导出这个配置描述文件，别签名。&lt;/p&gt;
+
+&lt;p&gt;用文本编辑器编辑。&lt;/p&gt;
+
+&lt;p&gt;找到这一段&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;key&amp;gt;OnDemandEnabled&amp;lt;/key&amp;gt;
+&amp;lt;integer&amp;gt;1&amp;lt;/integer&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;改成下面这样&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;key&amp;gt;OnDemandEnabled&amp;lt;/key&amp;gt;
+&amp;lt;integer&amp;gt;1&amp;lt;/integer&amp;gt;
+&amp;lt;key&amp;gt;OnDemandRules&amp;lt;/key&amp;gt;
+&amp;lt;array&amp;gt;
+  &amp;lt;dict&amp;gt;
+    &amp;lt;key&amp;gt;Action&amp;lt;/key&amp;gt;
+    &amp;lt;string&amp;gt;Connect&amp;lt;/string&amp;gt;
+  &amp;lt;/dict&amp;gt;
+&amp;lt;/array&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;另外，如果配置描述文件里只有 &lt;code&gt;XAuthName&lt;/code&gt;，没有 &lt;code&gt;XAuthPassword&lt;/code&gt;的话，可以自己加上这个 Key，然后把密码填上。&lt;/p&gt;
+
+&lt;p&gt;把这个配置描述文件，连同刚才下载好的服务器CA证书 &lt;code&gt;strongswanCert.pem&lt;/code&gt; 一起，用邮件发到自己的 iOS 设备上，然后安装好，试一下吧。&lt;/p&gt;
+
+&lt;h1 id=&quot;dns&quot;&gt;DNS&lt;/h1&gt;
+
+&lt;p&gt;使用刚才配置的 IPsec VPN 翻墙的话，就总会使用谷歌的 DNS 服务器做域名查询。这样很多明明国内有 CDN 的域名，却会解析到国外的 IP 上，造成访问缓慢。所以我要利用 &lt;code&gt;pdnsd&lt;/code&gt; 来创建一个带缓存的域名解析服务。这里主要参考了&lt;a href=&quot;https://jackyyf.com/work/480&quot;&gt;这篇文章&lt;/a&gt;。&lt;/p&gt;
+
+&lt;h2 id=&quot;pdsnd&quot;&gt;安装 pdsnd&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;sudo apt-get install pdnsd
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;pdnsd&quot;&gt;配置 pdnsd&lt;/h2&gt;
+
+&lt;p&gt;编辑 /etc/pdnsd.conf&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;global {
+	perm_cache = 8192;
+	cache_dir = &quot;/var/cache/pdnsd&quot;;
+	run_as = &quot;pdnsd&quot;;
+	server_ip = 0.0.0.0;
+	status_ctl = on;
+	paranoid = on;
+	query_method = udp_tcp;
+	tcp_server = on;
+	min_ttl = 1d;
+	max_ttl = 52w;
+	timeout = 10;
+
+	randomize_recs = on;
+	debug = off;
+	daemon = on;
+	verbosity = 1;
+	neg_rrs_pol = on;
+	neg_domain_pol = on;
+	par_queries = 4;
+}
+
+server {
+	label				= &quot;Unicom Beijing&quot;;
+	ip 					=  202.106.196.115, 202.106.46.151, 202.106.0.20, 202.106.195.68;
+	timeout				= 10;
+	proxy_only			= on;
+	caching				= on;
+	randomize_servers	= off;
+    reject_policy		= fail;
+    reject_recursively  = on;
+	include				=
+// Place Domains Below. Remember add a dot(&quot;.&quot;) at the start of domain, if you also want to redirect all subdomains!
+		&quot;.cn&quot;,
+// Place Domains Above.
+		&quot;DOMAIN.PADDING&quot;;
+
+
+	exclude				=
+// Place Domains Below. Remember add a dot(&quot;.&quot;) at the start of domain, if you also want to redirect all subdomains!
+
+&quot;.darpa.mil&quot;, &quot;.fxnetworks.com&quot;, &quot;.hulu.com&quot;, &quot;.huluim.com&quot;, &quot;.muzu.tv&quot;, &quot;.netflix.com&quot;, &quot;.pandora.com&quot;, &quot;.pandora.tv&quot;, &quot;.pure18.com&quot;, &quot;.spotify.com&quot;, &quot;.target.com&quot;, &quot;.turntable.fm&quot;, &quot;.vevo.com&quot;, &quot;.zattoo.com&quot;, &quot;.qq.co.za&quot;, &quot;.zozotown.com&quot;, &quot;.0rz.tw&quot;, &quot;.0to255.com&quot;, &quot;.1-apple.com.tw&quot;, &quot;.10musume.com&quot;, &quot;.123rf.com&quot;, &quot;.12bet.com&quot;, &quot;.12vpn.com&quot;, &quot;.141hongkong.com&quot;, &quot;.173ng.com&quot;, &quot;.1984bbs.com&quot;, &quot;.1984bbs.org&quot;, &quot;.1bao.org&quot;, &quot;.1pondo.tv&quot;, &quot;.1eew.com&quot;, &quot;.2-hand.info&quot;, &quot;.2000fun.com&quot;, &quot;.2008xianzhang.info&quot;, &quot;.21andy.com&quot;, &quot;.24smile.org&quot;, &quot;.2shared.com&quot;, &quot;.315lz.com&quot;, &quot;.36rain.com&quot;, &quot;.4bluestones.biz&quot;, &quot;.4chan.org&quot;, &quot;.5i01.com&quot;, &quot;.taiwannation.50webs.com&quot;, &quot;.51.ca&quot;, &quot;.5maodang.com&quot;, &quot;.6-4.net&quot;, &quot;.64tianwang.com&quot;, &quot;.64wiki.com&quot;, &quot;.666kb.com&quot;, &quot;.6park.com&quot;, &quot;.www.6v6dota.com&quot;, &quot;.7capture.com&quot;, &quot;.881903.com&quot;, &quot;.888.com&quot;, &quot;.89-64.org&quot;, &quot;.9001700.com&quot;, &quot;.908taiwan.org&quot;, &quot;.92ccav.com&quot;, &quot;.9bis.com&quot;, &quot;.9bis.net&quot;, &quot;.a-normal-day.com&quot;, &quot;.a5.com.ru&quot;, &quot;.aboluowang.com&quot;, &quot;.aboutgfw.com&quot;, &quot;.acgkj.com&quot;, &quot;.actimes.com.au&quot;, &quot;.aculo.us&quot;, &quot;.addictedtocoffee.de&quot;, &quot;.adultfriendfinder.com&quot;, &quot;.adultkeep.net&quot;, &quot;.advanscene.com&quot;, &quot;.advertfan.com&quot;, &quot;.aenhancers.com&quot;, &quot;.af.mil&quot;, &quot;.aiph.net&quot;, &quot;.aisex.com&quot;, &quot;.ait.org.tw&quot;, &quot;.aiweiweiblog.com&quot;, &quot;.ajaxplorer.info&quot;, &quot;.www.ajsands.com&quot;, &quot;.akiba-online.com&quot;, &quot;.al-qimmah.net&quot;, &quot;.alabout.com&quot;, &quot;.alasbarricadas.org&quot;, &quot;.notes.alexdong.com&quot;, &quot;.alexlur.org&quot;, &quot;.aliengu.com&quot;, &quot;.alkasir.com&quot;, &quot;.allgirlsallowed.org&quot;, &quot;.alliance.org.hk&quot;, &quot;.allinfa.com&quot;, &quot;.allinfo.com&quot;, &quot;.allmovie.com&quot;, &quot;.alternate-tools.com&quot;, &quot;.alvinalexander.com&quot;, &quot;.alwaysdata.com&quot;, &quot;.alwaysdata.net&quot;, &quot;.am730.com.hk&quot;, &quot;.amazon.com&quot;, &quot;.ameblo.jp&quot;, &quot;.americangreencard.com&quot;, &quot;.amiblockedornot.com&quot;, &quot;.amnesty.org&quot;, &quot;.amnestyusa.org&quot;, &quot;.amoiist.com&quot;, &quot;.amzs.me&quot;, &quot;.analyze-v.com&quot;, &quot;.anchorfree.com&quot;, &quot;.andfaraway.net&quot;, &quot;.animecrazy.net&quot;, &quot;.anobii.com&quot;, &quot;.anonymizer.com&quot;, &quot;.anontext.com&quot;, &quot;.anthonycalzadilla.com&quot;, &quot;.antiwave.net&quot;, &quot;.aobo.com.au&quot;, &quot;.aolchannels.aol.com&quot;, &quot;.video.aol.ca&quot;, &quot;.aol.co.uk&quot;, &quot;.video.aol.com&quot;, &quot;.www.aolnews.com&quot;, &quot;.video.ap.org&quot;, &quot;.apetube.com&quot;, &quot;.apiary.io&quot;, &quot;.apigee.com&quot;, &quot;.appledaily.com&quot;, &quot;.archive.is&quot;, &quot;.archive.org&quot;, &quot;.arctosia.com&quot;, &quot;.areca-backup.org&quot;, &quot;.army.mil&quot;, &quot;.artsy.net&quot;, &quot;.asahichinese.com&quot;, &quot;.asdfg.jp&quot;, &quot;.asiaharvest.org&quot;, &quot;.asianews.it&quot;, &quot;.asianwomensfilm.de&quot;, &quot;.askstudent.com&quot;, &quot;.askynz.net&quot;, &quot;.assembla.com&quot;, &quot;.astonmartinnews.com&quot;, &quot;.atchinese.com&quot;, &quot;.atgfw.org&quot;, &quot;.atj.org.tw&quot;, &quot;.atlaspost.com&quot;, &quot;.atnext.com&quot;, &quot;.avaaz.org&quot;, &quot;.avdb.in&quot;, &quot;.avidemux.org&quot;, &quot;.avoision.com&quot;, &quot;.axureformac.com&quot;, &quot;.forum.baby-kingdom.com&quot;, &quot;.babynet.com.hk&quot;, &quot;.backchina.com&quot;, &quot;.backpackers.com.tw&quot;, &quot;.badoo.com&quot;, &quot;.baidu.jp&quot;, &quot;.baixing.me&quot;, &quot;.hen.bao.li&quot;, &quot;.bannedbook.org&quot;, &quot;.barnabu.co.uk&quot;, &quot;.bayvoice.net&quot;, &quot;.dajusha.baywords.com&quot;, &quot;.bbc.co.uk&quot;, &quot;.bbcchinese.com&quot;, &quot;.bbc.in&quot;, &quot;.bbg.gov&quot;, &quot;.bbsfeed.com&quot;, &quot;.bbsland.com&quot;, &quot;.bcc.com.tw&quot;, &quot;.bcchinese.net&quot;, &quot;.bebo.com&quot;, &quot;.beijing1989.com&quot;, &quot;.beijingspring.com&quot;, &quot;.berlintwitterwall.com&quot;, &quot;.bestforchina.org&quot;, &quot;.bestvpnservice.com&quot;, &quot;.bet365.com&quot;, &quot;.betfair.com&quot;, &quot;.bettween.com&quot;, &quot;.bewww.net&quot;, &quot;.bfnn.org&quot;, &quot;.bfsh.hk&quot;, &quot;.biantailajiao.com&quot;, &quot;.bigfools.com&quot;, &quot;.bignews.org&quot;, &quot;.bigsound.org&quot;, &quot;.bill2-software.com&quot;, &quot;.billypan.com&quot;, &quot;.billywr.com&quot;, &quot;.bipic.net&quot;, &quot;.bit.ly&quot;, &quot;.bitshare.com&quot;, &quot;.bjzc.org&quot;, &quot;.tor.blingblingsquad.net&quot;, &quot;.blinkx.com&quot;, &quot;.blinw.com&quot;, &quot;.blip.tv&quot;, &quot;.blockcn.com&quot;, &quot;.blog.de&quot;, &quot;.blogcatalog.com&quot;, &quot;.blogger.com&quot;, &quot;.blogimg.jp&quot;, &quot;.blog.kangye.org&quot;, &quot;.bloglines.com&quot;, &quot;.bloglovin.com&quot;, &quot;.rconversation.blogs.com&quot;, &quot;.blogspot.co.uk&quot;, &quot;.blogspot.com&quot;, &quot;.blogspot.de&quot;, &quot;.blogspot.fr&quot;, &quot;.blogspot.hk&quot;, &quot;.blogspot.in&quot;, &quot;.blogspot.jp&quot;, &quot;.blogtd.net&quot;, &quot;.blogtd.org&quot;, &quot;.bloodshed.net&quot;, &quot;.bloomberg.cn&quot;, &quot;.bloomberg.com&quot;, &quot;.bloomberg.de&quot;, &quot;.bloomfortune.com&quot;, &quot;.bnrmetal.com&quot;, &quot;.boardreader.com&quot;, &quot;.bonbonme.com&quot;, &quot;.books.com.tw&quot;, &quot;.botanwang.com&quot;, &quot;.bot.nu&quot;, &quot;.bowenpress.com&quot;, &quot;.dl.box.net&quot;, &quot;.boxun.com&quot;, &quot;.boxun.tv&quot;, &quot;.boxunblog.com&quot;, &quot;.br.st&quot;, &quot;.brandonhutchinson.com&quot;, &quot;.braumeister.org&quot;, &quot;.break.com&quot;, &quot;.breakingtweets.com&quot;, &quot;.briefdream.com&quot;, &quot;.brightkite.com&quot;, &quot;.brizzly.com&quot;, &quot;.broadbook.com&quot;, &quot;.ibros.org&quot;, &quot;.brucewang.net&quot;, &quot;.bt95.com&quot;, &quot;.budaedu.org&quot;, &quot;.bullog.org&quot;, &quot;.bullogger.com&quot;, &quot;.businessweek.com&quot;, &quot;.businesstimes.com.cn&quot;, &quot;.bugclub.org&quot;, &quot;.buugaa.com&quot;, &quot;.buzzurl.jp&quot;, &quot;.bwsj.hk&quot;, &quot;.holz.byethost8.com&quot;, &quot;.c-spanvideo.org&quot;, &quot;.c-est-simple.com&quot;, &quot;.cactusvpn.com&quot;, &quot;.cafepress.com&quot;, &quot;.calameo.com&quot;, &quot;.cn.calameo.com&quot;, &quot;.cams.com&quot;, &quot;.canadameet.com&quot;, &quot;.bbs.cantonese.asia&quot;, &quot;.www.cantonese.asia&quot;, &quot;.canyu.org&quot;, &quot;.cao.im&quot;, &quot;.caobian.info&quot;, &quot;.caochangqing.com&quot;, &quot;.cari.com.my&quot;, &quot;.catch22.net&quot;, &quot;.catfightpayperview.xxx&quot;, &quot;.catholic.org.hk&quot;, &quot;.catholic.org.tw&quot;, &quot;.cbsnews.com&quot;, &quot;.ccavtop10.com&quot;, &quot;.ccdtr.org&quot;, &quot;.cclife.org&quot;, &quot;.ccthere.com&quot;, &quot;.cctongbao.com&quot;, &quot;.ccue.ca&quot;, &quot;.ccue.com&quot;, &quot;.cdig.info&quot;, &quot;.cdjp.org&quot;, &quot;.cdnews.com.tw&quot;, &quot;.cdp1998.org&quot;, &quot;.cdp2006.org&quot;, &quot;.cdpusa.org&quot;, &quot;.cdpweb.org&quot;, &quot;.cdpwu.org&quot;, &quot;.cecc.gov&quot;, &quot;.cellulo.info&quot;, &quot;.cenci.tk&quot;, &quot;.cenews.eu&quot;, &quot;.centralnation.com&quot;, &quot;.centurys.net&quot;, &quot;.chandoo.org&quot;, &quot;.change.org&quot;, &quot;.changp.com&quot;, &quot;.chaturbate.com&quot;, &quot;.chengmingmag.com&quot;, &quot;.chenguangcheng.com&quot;, &quot;.chenpokong.com&quot;, &quot;.cherrysave.com&quot;, &quot;.china-week.com&quot;, &quot;.china101.com&quot;, &quot;.china21.com&quot;, &quot;.china21.org&quot;, &quot;.chinaaffairs.org&quot;, &quot;.chinaaid.me&quot;, &quot;.chinaaid.us&quot;, &quot;.chinaaid.org&quot;, &quot;.chinaaid.net&quot;, &quot;.chinacomments.org&quot;, &quot;.chinachannel.hk&quot;, &quot;.chinadigitaltimes.net&quot;, &quot;.chinaeweekly.com&quot;, &quot;.chinafreepress.org&quot;, &quot;.chinageeks.org&quot;, &quot;.chinagfw.org&quot;, &quot;.chinagreenparty.org&quot;, &quot;.chinahush.com&quot;, &quot;.chinalawtranslate.com&quot;, &quot;.chinaxchina.com&quot;, &quot;.chinainperspective.com&quot;, &quot;.chinainperspective.net&quot;, &quot;.chinainperspective.org&quot;, &quot;.chinainterimgov.org&quot;, &quot;.chinalawandpolicy.com&quot;, &quot;.chinamule.com&quot;, &quot;.chinamz.org&quot;, &quot;.chinarightsia.org&quot;, &quot;.chinasocialdemocraticparty.com&quot;, &quot;.chinasoul.org&quot;, &quot;.chinatimes.com&quot;, &quot;.chinatweeps.com&quot;, &quot;.chinaway.org&quot;, &quot;.chinaworker.info&quot;, &quot;.chinayouth.org.hk&quot;, &quot;.chinayuanmin.org&quot;, &quot;.chinese-hermit.net&quot;, &quot;.chinese-memorial.org&quot;, &quot;.chinesedailynews.com&quot;, &quot;.chinesen.de&quot;, &quot;.chinesenewsnet.com&quot;, &quot;.chinesepen.org&quot;, &quot;.chinesetalks.net&quot;, &quot;.chingcheong.com&quot;, &quot;.chn.chosun.com&quot;, &quot;.christianstudy.com&quot;, &quot;.christusrex.org&quot;, &quot;.chrlcg-hk.org&quot;, &quot;.chromeadblock.com&quot;, &quot;.chubun.com&quot;, &quot;.chuizi.net&quot;, &quot;.chrispederick.com&quot;, &quot;.chrispederick.net&quot;, &quot;.chrlawyers.hk&quot;, &quot;.allaboutalpha.com&quot;, &quot;.citizenlab.org&quot;, &quot;.citizensradio.org&quot;, &quot;.city9x.com&quot;, &quot;.civicparty.hk&quot;, &quot;.civilhrfront.org&quot;, &quot;.psiphon.civisec.org&quot;, &quot;.cjb.net&quot;, &quot;.ck101.com&quot;, &quot;.classicalguitarblog.net&quot;, &quot;.clb.org.hk&quot;, &quot;.clipfish.de&quot;, &quot;.cmule.com&quot;, &quot;.cms.gov&quot;, &quot;.cna.com.tw&quot;, &quot;.cnavista.com.tw&quot;, &quot;.cnd.org&quot;, &quot;.wiki.cnitter.com&quot;, &quot;.cnn.com&quot;, &quot;.news.cnyes.com&quot;, &quot;.cochina.org&quot;, &quot;.code1984.com&quot;, &quot;.codeshare.io&quot;, &quot;.tosh.comedycentral.com&quot;, &quot;.comefromchina.com&quot;, &quot;.compileheart.com&quot;, &quot;.conoyo.com&quot;, &quot;.coolaler.com&quot;, &quot;.coolder.com&quot;, &quot;.coolloud.org.tw&quot;, &quot;.corumcollege.com&quot;, &quot;.couchdbwiki.com&quot;, &quot;.cotweet.com&quot;, &quot;.cpj.org&quot;, &quot;.crackle.com&quot;, &quot;.crd-net.org&quot;, &quot;.creaders.net&quot;, &quot;.crossthewall.net&quot;, &quot;.csdparty.com&quot;, &quot;.csuchen.de&quot;, &quot;.cts.com.tw&quot;, &quot;.cuhkacs.org&quot;, &quot;.cuihua.org&quot;, &quot;.cuiweiping.net&quot;, &quot;.curvefish.com&quot;, &quot;.culture.tw&quot;, &quot;.forum.cyberctm.com&quot;, &quot;.cyberghostvpn.com&quot;, &quot;.cynscribe.com&quot;, &quot;.cytode.us&quot;, &quot;.ifan.cz.cc&quot;, &quot;.mike.cz.cc&quot;, &quot;.nic.cz.cc&quot;, &quot;.cl.d0z.net&quot;, &quot;.dabr.co.uk&quot;, &quot;.dabr.mobi&quot;, &quot;.dabr.me&quot;, &quot;.dadazim.com&quot;, &quot;.dadi360.com&quot;, &quot;.dafagood.com&quot;, &quot;.dafahao.com&quot;, &quot;.dalailama.ru&quot;, &quot;.dailidaili.com&quot;, &quot;.dailymotion.com&quot;, &quot;.dajiyuan.com&quot;, &quot;.dajiyuan.eu&quot;, &quot;.dalailama.com&quot;, &quot;.dalailamaworld.com&quot;, &quot;.dalianmeng.org&quot;, &quot;.danke4china.net&quot;, &quot;.danwei.org&quot;, &quot;.daolan.net&quot;, &quot;.daxa.cn&quot;, &quot;.cn.dayabook.com&quot;, &quot;.daylife.com&quot;, &quot;.ddc.com.tw&quot;, &quot;.de-sci.org&quot;, &quot;.lists.debian.org&quot;, &quot;.packages.debian.org&quot;, &quot;.delcamp.net&quot;, &quot;.delicious.com&quot;, &quot;.democrats.org&quot;, &quot;.desc.se&quot;, &quot;.deutsche-welle.de&quot;, &quot;.dev102.com&quot;, &quot;.devio.us&quot;, &quot;.www.dfanning.com&quot;, &quot;.dfas.mil&quot;, &quot;.diaoyuislands.org&quot;, &quot;.digitalnomadsproject.org&quot;, &quot;.diigo.com&quot;, &quot;.furl.net&quot;, &quot;.directcreative.com&quot;, &quot;.discuss.com.hk&quot;, &quot;.disp.cc&quot;, &quot;.dit-inc.us&quot;, &quot;.dizhidizhi.com&quot;, &quot;.djangosnippets.org&quot;, &quot;.dl-laby.jp&quot;, &quot;.dlsite.com&quot;, &quot;.dnscrypt.org&quot;, &quot;.dojin.com&quot;, &quot;.dok-forum.net&quot;, &quot;.dolc.de&quot;, &quot;.dollf.com&quot;, &quot;.domain.club.tw&quot;, &quot;.dongde.com&quot;, &quot;.dongtaiwang.com&quot;, &quot;.dongtaiwang.net&quot;, &quot;.dongyangjing.com&quot;, &quot;.dontfilter.us&quot;, &quot;.dontmovetochina.com&quot;, &quot;.dotplane.com&quot;, &quot;.dotsub.com&quot;, &quot;.doubleaf.com&quot;, &quot;.dougscripts.com&quot;, &quot;.dowei.org&quot;, &quot;.doxygen.org&quot;, &quot;.dphk.org&quot;, &quot;.dpp.org.tw&quot;, &quot;.weigegebyc.dreamhosters.com&quot;, &quot;.drgan.net&quot;, &quot;.dropbox.com&quot;, &quot;.dropboxusercontent.com&quot;, &quot;.drtuber.com&quot;, &quot;.dtiblog.com&quot;, &quot;.dtic.mil&quot;, &quot;.dtiserv2.com&quot;, &quot;.duckduckgo.com&quot;, &quot;.duckload.com&quot;, &quot;.duckmylife.com&quot;, &quot;.duihua.org&quot;, &quot;.duoweitimes.com&quot;, &quot;.duping.net&quot;, &quot;.duplicati.com&quot;, &quot;.dupola.com&quot;, &quot;.dupola.net&quot;, &quot;.dvorak.org&quot;, &quot;.dw.de&quot;, &quot;.dw-world.com&quot;, &quot;.dw-world.de&quot;, &quot;.www.dwheeler.com&quot;, &quot;.dwnews.com&quot;, &quot;.xys.dxiong.com&quot;, &quot;.dy24k.info&quot;, &quot;.dynawebinc.com&quot;, &quot;.dyndns.org&quot;, &quot;.dzze.com&quot;, &quot;.e-gold.com&quot;, &quot;.g.e-hentai.org&quot;, &quot;.e-info.org.tw&quot;, &quot;.e-traderland.net&quot;, &quot;.hkjp.easyweb.hk&quot;, &quot;.ebookbrowse.com&quot;, &quot;.ebookee.com&quot;, &quot;.ecministry.net&quot;, &quot;.bbs.ecstart.com&quot;, &quot;.edicypages.com&quot;, &quot;.edoors.com&quot;, &quot;.edubridge.com&quot;, &quot;.eevpn.com&quot;, &quot;.efcc.org.hk&quot;, &quot;.eic-av.com&quot;, &quot;.electionsmeter.com&quot;, &quot;.eltondisney.com&quot;, &quot;.emacsblog.org&quot;, &quot;.emory.edu&quot;, &quot;.emule-ed2k.com&quot;, &quot;.chinese.engadget.com&quot;, &quot;.englishfromengland.co.uk&quot;, &quot;.entermap.com&quot;, &quot;.epochtimes-bg.com&quot;, &quot;.epochtimes-romania.com&quot;, &quot;.epochtimes.co.il&quot;, &quot;.epochtimes.co.kr&quot;, &quot;.epochtimes.com&quot;, &quot;.epochtimes.de&quot;, &quot;.epochtimes.fr&quot;, &quot;.epochtimes.ie&quot;, &quot;.epochtimes.jp&quot;, &quot;.epochtimes.ru&quot;, &quot;.epochtimes.se&quot;, &quot;.epochtimestr.com&quot;, &quot;.epochweekly.com&quot;, &quot;.erabaru.net&quot;, &quot;.erepublik.com&quot;, &quot;.ernestmandel.org&quot;, &quot;.erights.net&quot;, &quot;.etaiwannews.com&quot;, &quot;.etizer.org&quot;, &quot;.www.eulam.com&quot;, &quot;.eventful.com&quot;, &quot;.exblog.jp&quot;, &quot;.exblog.co.jp&quot;, &quot;.expatshield.com&quot;, &quot;.exploader.net&quot;, &quot;.extremetube.com&quot;, &quot;.eyevio.jp&quot;, &quot;.ezpc.tk&quot;, &quot;.ezpeer.com&quot;, &quot;.facebook.com&quot;, &quot;.connect.facebook.net&quot;, &quot;.facesofnyfw.com&quot;, &quot;.faiththedog.info&quot;, &quot;.fakku.net&quot;, &quot;.falunart.org&quot;, &quot;.falundafa.org&quot;, &quot;.falundafamuseum.org&quot;, &quot;.falunhr.org&quot;, &quot;.fanglizhi.info&quot;, &quot;.fangong.org&quot;, &quot;.fangongheike.com&quot;, &quot;.fanqianghou.com&quot;, &quot;.fapdu.com&quot;, &quot;.fawanghuihui.org&quot;, &quot;.fbcdn.net&quot;, &quot;.fanqiangyakexi.net&quot;, &quot;.fail.hk&quot;, &quot;.famunion.com&quot;, &quot;.fan-qiang.com&quot;, &quot;.fangbinxing.com&quot;, &quot;.fangeming.com&quot;, &quot;.fanswong.com&quot;, &quot;.fanyue.info&quot;, &quot;.farwestchina.com&quot;, &quot;.fastly.net&quot;, &quot;.favorious.com&quot;, &quot;.en.favotter.net&quot;, &quot;.faststone.org&quot;, &quot;.favstar.fm&quot;, &quot;.faydao.com&quot;, &quot;.fb.com&quot;, &quot;.fb.me&quot;, &quot;.fbsbx.com&quot;, &quot;.fc2.com&quot;, &quot;.fc2china.com&quot;, &quot;.blog125.fc2blog.net&quot;, &quot;.video.fdbox.com&quot;, &quot;.fdc89.jp&quot;, &quot;.fourface.nodesnoop.com&quot;, &quot;.feedbooks.mobi&quot;, &quot;.feeds.feedburner.com&quot;, &quot;.feeds2.feedburner.com&quot;, &quot;.feedzshare.com&quot;, &quot;.feelssh.com&quot;, &quot;.feer.com&quot;, &quot;.felixcat.net&quot;, &quot;.feministteacher.com&quot;, &quot;.fengzhenghu.com&quot;, &quot;.fflick.com&quot;, &quot;.fgmtv.net&quot;, &quot;.fgmtv.org&quot;, &quot;.filefactory.com&quot;, &quot;.files2me.com&quot;, &quot;.fileserve.com&quot;, &quot;.fillthesquare.org&quot;, &quot;.finalion.jp&quot;, &quot;.findbook.tw&quot;, &quot;.finler.net&quot;, &quot;.fireofliberty.org&quot;, &quot;.falsefire.com&quot;, &quot;.fleshbot.com&quot;, &quot;.flickr.com&quot;, &quot;.staticflickr.com&quot;, &quot;.flickrhivemind.net&quot;, &quot;.yuming.flnet.org&quot;, &quot;.cn.fmnnow.com&quot;, &quot;.blog.foolsmountain.com&quot;, &quot;.www.forum4hk.com&quot;, &quot;.pioneer-worker.forums-free.com&quot;, &quot;.4sq.com&quot;, &quot;.fotop.net&quot;, &quot;.video.foxbusiness.com&quot;, &quot;.fringenetwork.com&quot;, &quot;.flecheinthepeche.fr&quot;, &quot;.focusvpn.com&quot;, &quot;.fofg.org&quot;, &quot;.fooooo.com&quot;, &quot;.footwiball.com&quot;, &quot;.fourthinternational.org&quot;, &quot;.foxdie.us&quot;, &quot;.foxsub.com&quot;, &quot;.foxtang.com&quot;, &quot;.fqrouter.com&quot;, &quot;.franklc.com&quot;, &quot;.freakshare.com&quot;, &quot;.free4u.com.ar&quot;, &quot;.free-gate.org&quot;, &quot;.free.fr&quot;, &quot;.allonlinux.free.fr&quot;, &quot;.dimitrik.free.fr&quot;, &quot;.kineox.free.fr&quot;, &quot;.puttycm.free.fr&quot;, &quot;.freealim.com&quot;, &quot;.whitebear.freebearblog.org&quot;, &quot;.freechal.com&quot;, &quot;.freedomhouse.org&quot;, &quot;.freegao.com&quot;, &quot;.freelotto.com&quot;, &quot;.freeman2.com&quot;, &quot;.freeopenvpn.com&quot;, &quot;.freemoren.com&quot;, &quot;.freemorenews.com&quot;, &quot;.freenet-china.org&quot;, &quot;.freenewscn.com&quot;, &quot;.freeoz.org&quot;, &quot;.freeserve.co.uk&quot;, &quot;.freessh.us&quot;, &quot;.free-ssh.com&quot;, &quot;.freenetproject.org&quot;, &quot;.www.freetibet.org&quot;, &quot;.freewallpaper4.me&quot;, &quot;.freewebs.com&quot;, &quot;.freeweibo.com&quot;, &quot;.freexinwen.com&quot;, &quot;.friendfeed.com&quot;, &quot;.friendfeed-media.com&quot;, &quot;.ff.im&quot;, &quot;.zensur.freerk.com&quot;, &quot;.freevpn.nl&quot;, &quot;.fring.com&quot;, &quot;.frommel.net&quot;, &quot;.frontlinedefenders.org&quot;, &quot;.fscked.org&quot;, &quot;.fsurf.com&quot;, &quot;.fuckcnnic.net&quot;, &quot;.fuckgfw.org&quot;, &quot;.fulue.com&quot;, &quot;.funf.tw&quot;, &quot;.funp.com&quot;, &quot;.furinkan.com&quot;, &quot;.futurechinaforum.org&quot;, &quot;.futuremessage.org&quot;, &quot;.fw.cm&quot;, &quot;.fzh999.com&quot;, &quot;.fzh999.net&quot;, &quot;.gabocorp.com&quot;, &quot;.galenwu.com&quot;, &quot;.game735.com&quot;, &quot;.gamebase.com.tw&quot;, &quot;.gamer.com.tw&quot;, &quot;.gamez.com.tw&quot;, &quot;.gaoming.net&quot;, &quot;.ganges.com&quot;, &quot;.gaopi.net&quot;, &quot;.gappp.org&quot;, &quot;.gardennetworks.com&quot;, &quot;.gardennetworks.org&quot;, &quot;.gartlive.com&quot;, &quot;.gather.com&quot;, &quot;.gaymap.cc&quot;, &quot;.gazotube.com&quot;, &quot;.gclooney.com&quot;, &quot;.gcpnews.com&quot;, &quot;.gdbt.net&quot;, &quot;.gdzf.org&quot;, &quot;.geek-art.net&quot;, &quot;.geekerhome.com&quot;, &quot;.geekmanuals.com&quot;, &quot;.genuitec.com&quot;, &quot;.geocities.co.jp&quot;, &quot;.geocities.com&quot;, &quot;.hk.geocities.com&quot;, &quot;.geocities.jp&quot;, &quot;.geohot.com&quot;, &quot;.geometrictools.com&quot;, &quot;.get-digital-help.com&quot;, &quot;.getchu.com&quot;, &quot;.getfoxyproxy.org&quot;, &quot;.getfreedur.com&quot;, &quot;.getlantern.org&quot;, &quot;.getjetso.com&quot;, &quot;.getiton.com&quot;, &quot;.getsocialscope.com&quot;, &quot;.gfw.org.ua&quot;, &quot;.ggssl.com&quot;, &quot;.ghost.org&quot;, &quot;.giga-web.jp&quot;, &quot;.cn.giganews.com&quot;, &quot;.gigporno.ru&quot;, &quot;.gimpshop.com&quot;, &quot;.girlbanker.com&quot;, &quot;.glennhilton.com&quot;, &quot;.globaljihad.net&quot;, &quot;.globalmuseumoncommunism.org&quot;, &quot;.globalrescue.net&quot;, &quot;.globalvoicesonline.org&quot;, &quot;.gmbd.cn&quot;, &quot;.gmhz.org&quot;, &quot;.goagent.biz&quot;, &quot;.goagentplus.com&quot;, &quot;.godfootsteps.org&quot;, &quot;.goldenmelody.com.tw&quot;, &quot;.goldwave.com&quot;, &quot;.gongmeng.info&quot;, &quot;.gongm.in&quot;, &quot;.gongminliliang.com&quot;, &quot;.gongwt.com&quot;, &quot;.goodreads.com&quot;, &quot;.goodreaders.com&quot;, &quot;.goofind.com&quot;, &quot;.googleusercontent.com&quot;, &quot;.googledrive.com&quot;, &quot;.googlesile.com&quot;, &quot;.gopetition.com&quot;, &quot;.googlevideo.com&quot;, &quot;.gotw.ca&quot;, &quot;.grandtrial.org&quot;, &quot;.graphis.ne.jp&quot;, &quot;.greatfirewall.biz&quot;, &quot;.greatfirewallofchina.net&quot;, &quot;.greatfirewallofchina.org&quot;, &quot;.greenparty.org.tw&quot;, &quot;.gpass1.com&quot;, &quot;.great-firewall.com&quot;, &quot;.great-roc.org&quot;, &quot;.greatroc.org&quot;, &quot;.greatzhonghua.org&quot;, &quot;.greenvpn.net&quot;, &quot;.gs-discuss.com&quot;, &quot;.gtricks.com&quot;, &quot;.guancha.org&quot;, &quot;.gun-world.net&quot;, &quot;.gutteruncensored.com&quot;, &quot;.gvm.com.tw&quot;, &quot;.gzm.tv&quot;, &quot;.gzone-anime.info&quot;, &quot;.apis.google.com&quot;, &quot;.appspot.com&quot;, &quot;.code.google.com&quot;, &quot;.autoproxy-gfwlist.googlecode.com&quot;, &quot;.gfwinterceptor.googlecode.com&quot;, &quot;.goagent.googlecode.com&quot;, &quot;.gtap.googlecode.com&quot;, &quot;.sshtunnel.googlecode.com&quot;, &quot;.tuite.googlecode.com&quot;, &quot;.gaeproxy.googlecode.com&quot;, &quot;.docs.google.com&quot;, &quot;.echofon.com&quot;, &quot;.golang.org&quot;, &quot;.www.klip.me&quot;, &quot;.ub0.cc&quot;, &quot;.wozy.in&quot;, &quot;.drive.google.com&quot;, &quot;.groups.google.com&quot;, &quot;.google.com&quot;, &quot;.google.com.hk&quot;, &quot;.encrypted.google.com&quot;, &quot;.feedproxy.google.com&quot;, &quot;.knol.google.com&quot;, &quot;.picasaweb.google.com&quot;, &quot;.sites.google.com&quot;, &quot;.talkgadget.google.com&quot;, &quot;.video.google.com&quot;, &quot;.cnn.googlepages.com&quot;, &quot;.freegateget.googlepages.com&quot;, &quot;.myboooks.googlepages.com&quot;, &quot;.gospelherald.com&quot;, &quot;.hk.gradconnection.com&quot;, &quot;.graylog2.org&quot;, &quot;.greatfire.org&quot;, &quot;.greatroc.tw&quot;, &quot;.gstatic.com&quot;, &quot;.guishan.org&quot;, &quot;.gunsamerica.com&quot;, &quot;.gyalwarinpoche.com&quot;, &quot;.h-china.org&quot;, &quot;.h1n1china.org&quot;, &quot;.hacken.cc&quot;, &quot;.hackthatphone.net&quot;, &quot;.hahlo.com&quot;, &quot;.hakkatv.org.tw&quot;, &quot;.hanunyi.com&quot;, &quot;.hardsextube.com&quot;, &quot;.hasaowall.com&quot;, &quot;.have8.com&quot;, &quot;.hdtvb.net&quot;, &quot;.heartyit.com&quot;, &quot;.hecaitou.net&quot;, &quot;.hechaji.com&quot;, &quot;.helloandroid.com&quot;, &quot;.helloqueer.com&quot;, &quot;.hellotxt.com&quot;, &quot;.htxt.it&quot;, &quot;.hellouk.org&quot;, &quot;.helpeachpeople.com&quot;, &quot;.helpzhuling.org&quot;, &quot;.date.fm&quot;, &quot;.flightcaster.com&quot;, &quot;.branch.com&quot;, &quot;.awardwinningfjords.com&quot;, &quot;.futureme.org&quot;, &quot;.getcloudapp.com&quot;, &quot;.cl.ly&quot;, &quot;.getsmartlinks.com&quot;, &quot;.git-scm.com&quot;, &quot;.lesscss.org&quot;, &quot;.list.ly&quot;, &quot;.maxgif.com&quot;, &quot;.overlapr.com&quot;, &quot;.peerpong.com&quot;, &quot;.pose.com&quot;, &quot;.samsoff.es&quot;, &quot;.sendoid.com&quot;, &quot;.speckleapp.com&quot;, &quot;.stuffimreading.net&quot;, &quot;.tomayko.com&quot;, &quot;.twt.fm&quot;, &quot;.views.fm&quot;, &quot;.heqinglian.net&quot;, &quot;.here4news.com&quot;, &quot;.heungkongdiscuss.com&quot;, &quot;.app.heywire.com&quot;, &quot;.hgseav.com&quot;, &quot;.hidden-advent.org&quot;, &quot;.hidecloud.com&quot;, &quot;.hidemyass.com&quot;, &quot;.hideipvpn.com&quot;, &quot;.hihiforum.com&quot;, &quot;.hihistory.net&quot;, &quot;.higfw.com&quot;, &quot;.highrockmedia.com&quot;, &quot;.hikinggfw.org&quot;, &quot;.himemix.com&quot;, &quot;.times.hinet.net&quot;, &quot;.hjclub.info&quot;, &quot;.hk-pub.com&quot;, &quot;.hk32168.com&quot;, &quot;.app.hkatvnews.com&quot;, &quot;.hkbc.net&quot;, &quot;.hkbf.org&quot;, &quot;.hkday.net&quot;, &quot;.hkdailynews.com.hk&quot;, &quot;.hkej.com&quot;, &quot;.hkepc.com&quot;, &quot;.hkfront.org&quot;, &quot;.hkgolden.com&quot;, &quot;.hkgreenradio.org&quot;, &quot;.hkheadline.com&quot;, &quot;.hkhkhk.com&quot;, &quot;.hkjc.com&quot;, &quot;.hkjp.org&quot;, &quot;.hkptu.org&quot;, &quot;.hkreporter.com&quot;, &quot;.hkzone.org&quot;, &quot;.apps.hloli.net&quot;, &quot;.hnjhj.com&quot;, &quot;.holyspiritspeaks.org&quot;, &quot;.derekhsu.homeip.net&quot;, &quot;.homeservershow.com&quot;, &quot;.hongmeimei.com&quot;, &quot;.hongzhi.li&quot;, &quot;.hootsuite.com&quot;, &quot;.hotfile.com&quot;, &quot;.hotpot.hk&quot;, &quot;.hotspotshield.com&quot;, &quot;.hougaige.com&quot;, &quot;.howtoforge.com&quot;, &quot;.hqcdp.org&quot;, &quot;.hrcir.com&quot;, &quot;.hrichina.org&quot;, &quot;.hrw.org&quot;, &quot;.hsjp.net&quot;, &quot;.htmldog.com&quot;, &quot;.huaglad.com&quot;, &quot;.huanghuagang.org&quot;, &quot;.huaren.us&quot;, &quot;.huaxia-news.com&quot;, &quot;.huaxin.ph&quot;, &quot;.hua-yue.net&quot;, &quot;.hugoroy.eu&quot;, &quot;.t.huhaitai.com&quot;, &quot;.hungerstrikeforaids.org&quot;, &quot;.huping.net&quot;, &quot;.hutianyi.net&quot;, &quot;.hutong9.net&quot;, &quot;.hwinfo.com&quot;, &quot;.hypeshell.com&quot;, &quot;.hyperrate.com&quot;, &quot;.i1.hk&quot;, &quot;.i2p2.de&quot;, &quot;.i2runner.com&quot;, &quot;.iask.ca&quot;, &quot;.iask.bz&quot;, &quot;.ibiblio.org&quot;, &quot;.iblogserv-f.net&quot;, &quot;.cn.ibtimes.com&quot;, &quot;.blogs.icerocket.com&quot;, &quot;.icij.org&quot;, &quot;.icl-fi.org&quot;, &quot;.iconpaper.org&quot;, &quot;.w.idaiwan.com&quot;, &quot;.idemocracy.asia&quot;, &quot;.identi.ca&quot;, &quot;.idiomconnection.com&quot;, &quot;.www.idlcoyote.com&quot;, &quot;.idouga.com&quot;, &quot;.forum.idsam.com&quot;, &quot;.idv.tw&quot;, &quot;.ieasynews.net&quot;, &quot;.ied2k.net&quot;, &quot;.ifanqiang.com&quot;, &quot;.ifanr.com&quot;, &quot;.ifcss.org&quot;, &quot;.ifjc.org&quot;, &quot;.ig.com.br&quot;, &quot;.igfw.net&quot;, &quot;.ignitedetroit.net&quot;, &quot;.igvita.com&quot;, &quot;.ihakka.net&quot;, &quot;.iicns.com&quot;, &quot;.illusionfactory.com&quot;, &quot;.ilove80.be&quot;, &quot;.im.tv&quot;, &quot;.im88.tw&quot;, &quot;.imageflea.com&quot;, &quot;.imageshack.us&quot;, &quot;.imagevenue.com&quot;, &quot;.imagezilla.net&quot;, &quot;.www.imdb.com&quot;, &quot;.img.ly&quot;, &quot;.imkev.com&quot;, &quot;.imlive.com&quot;, &quot;.immigration.gov.tw&quot;, &quot;.tech2.in.com&quot;, &quot;.incredibox.fr&quot;, &quot;.inmediahk.net&quot;, &quot;.innermongolia.org&quot;, &quot;.instagram.com&quot;, &quot;.interfaceaddiction.com&quot;, &quot;.internationalrivers.org&quot;, &quot;.internet.org&quot;, &quot;.internetdefenseleague.org&quot;, &quot;.internetfreedom.org&quot;, &quot;.internetpopculture.com&quot;, &quot;.inxian.com&quot;, &quot;.iphonehacks.com&quot;, &quot;.iphonix.fr&quot;, &quot;.ipicture.ru&quot;, &quot;.ipobar.com&quot;, &quot;.ippotv.com&quot;, &quot;.iptorrents.com&quot;, &quot;.ipvanish.com&quot;, &quot;.iredmail.org&quot;, &quot;.ironicsoftware.com&quot;, &quot;.ironbigfools.compython.net&quot;, &quot;.ironpython.net&quot;, &quot;.iset.com.tw&quot;, &quot;.islam.org.hk&quot;, &quot;.isaacmao.com&quot;,&quot;.!--isaacmao.com&quot;, &quot;.isgreat.org&quot;, &quot;.ismprofessional.net&quot;, &quot;.isohunt.com&quot;, &quot;.israbox.com&quot;, &quot;.blog.istef.info&quot;, &quot;.istockphoto.com&quot;, &quot;.isunaffairs.com&quot;, &quot;.isuntv.com&quot;, &quot;.itaboo.info&quot;, &quot;.ithome.com.tw&quot;, &quot;.itshidden.com&quot;, &quot;.itweet.net&quot;, &quot;.iu45.com&quot;, &quot;.ixquick.com&quot;, &quot;.izaobao.us&quot;, &quot;.gmozomg.izihost.org&quot;, &quot;.izles.net&quot;, &quot;.j.mp&quot;, &quot;.blog.jackjia.com&quot;, &quot;.jbtalks.cc&quot;, &quot;.jbtalks.com&quot;, &quot;.jbtalks.my&quot;, &quot;.jeanyim.com&quot;, &quot;.jgoodies.com&quot;, &quot;.jiaoyou8.com&quot;, &quot;.jiehua.cz&quot;, &quot;.hk.jiepang.com&quot;, &quot;.tw.jiepang.com&quot;, &quot;.jieshibaobao.com&quot;, &quot;.jimoparty.com&quot;, &quot;.jinbushe.org&quot;, &quot;.zhao.jinhai.de&quot;, &quot;.jingpin.org&quot;, &quot;.ac.jiruan.net&quot;, &quot;.jitouch.com&quot;, &quot;.jkforum.net&quot;, &quot;.jmsc.hku.hk&quot;, &quot;.joachims.org&quot;, &quot;.jobso.tv&quot;, &quot;.joeedelman.com&quot;, &quot;.journalofdemocracy.org&quot;, &quot;.jpopforum.net&quot;, &quot;.juliereyc.com&quot;, &quot;.junauza.com&quot;, &quot;.junefourth-20.net&quot;, &quot;.justfreevpn.com&quot;, &quot;.zh-tw.justin.tv&quot;, &quot;.justtristan.com&quot;, &quot;.juziyue.com&quot;, &quot;.jwmusic.org&quot;, &quot;.jyxf.net&quot;, &quot;.ka-wai.com&quot;, &quot;.kagyuoffice.org.tw&quot;, &quot;.kaiyuan.de&quot;, &quot;.kakao.com&quot;, &quot;.kanzhongguo.com&quot;, &quot;.kanzhongguo.eu&quot;, &quot;.karayou.com&quot;, &quot;.kcsoftwares.com&quot;, &quot;.kechara.com&quot;, &quot;.keepandshare.com&quot;, &quot;.kendincos.net&quot;, &quot;.kenengba.com&quot;, &quot;.wiki.keso.cn&quot;, &quot;.khmusic.com.tw&quot;, &quot;.kimy.com.tw&quot;, &quot;.kingdomsalvation.org&quot;, &quot;.kinghost.com&quot;, &quot;.kingstone.com.tw&quot;, &quot;.killwall.com&quot;, &quot;.kissbbao.cn&quot;, &quot;.knowledgerush.com&quot;, &quot;.kodingen.com&quot;, &quot;.kompozer.net&quot;, &quot;.koolsolutions.com&quot;, &quot;.koornk.com&quot;, &quot;.kui.name&quot;, &quot;.kun.im&quot;, &quot;.kurtmunger.com&quot;, &quot;.kusocity.com&quot;, &quot;.kwongwah.com.my&quot;, &quot;.kyohk.net&quot;, &quot;.kzeng.info&quot;, &quot;.la-forum.org&quot;, &quot;.ladbrokes.com&quot;, &quot;.labiennale.org&quot;, &quot;.lagranepoca.com&quot;, &quot;.lalulalu.com&quot;, &quot;.laogai.org&quot;, &quot;.laomiu.com&quot;, &quot;.laoyang.info&quot;, &quot;.laptoplockdown.com&quot;, &quot;.laqingdan.net&quot;, &quot;.larsgeorge.com&quot;, &quot;.lastfm.es&quot;, &quot;.latelinenews.com&quot;, &quot;.lazarsearlymusic.com&quot;, &quot;.leecheukyan.org&quot;, &quot;.lenwhite.com&quot;, &quot;.lerosua.org&quot;, &quot;.blog.lester850.info&quot;, &quot;.letscorp.net&quot;, &quot;.liansi.org&quot;, &quot;.lianyue.net&quot;, &quot;.liaowangxizang.net&quot;, &quot;.liberal.org.hk&quot;, &quot;.libertytimes.com.tw&quot;, &quot;.lidecheng.com&quot;, &quot;.limiao.net&quot;, &quot;.abitno.linpie.com&quot;, &quot;.line.me&quot;, &quot;.linglingfa.com&quot;, &quot;.linkideo.com&quot;, &quot;.api.linksalpha.com&quot;, &quot;.apidocs.linksalpha.com&quot;, &quot;.www.linksalpha.com&quot;, &quot;.help.linksalpha.com&quot;, &quot;.linux-engineer.net&quot;, &quot;.linuxconfig.org&quot;, &quot;.linuxreviews.org&quot;, &quot;.linuxtoy.org&quot;, &quot;.lipuman.com&quot;, &quot;.listentoyoutube.com&quot;, &quot;.listorious.com&quot;, &quot;.liudejun.com&quot;, &quot;.liuhanyu.com&quot;, &quot;.liujianshu.com&quot;, &quot;.liuxiaotong.com&quot;, &quot;.liu.lu&quot;, &quot;.liveleak.com&quot;, &quot;.livestation.com&quot;, &quot;.livestream.com&quot;, &quot;.livingonline.us&quot;, &quot;.livingstream.com&quot;, &quot;.livevideo.com&quot;, &quot;.lizhizhuangbi.com&quot;, &quot;.lkcn.net&quot;, &quot;.lockdown.com&quot;, &quot;.lockestek.com&quot;, &quot;.logbot.net&quot;, &quot;.logiqx.com&quot;, &quot;.logmike.com&quot;, &quot;.longhair.hk&quot;, &quot;.longtermly.net&quot;, &quot;.lookatgame.com&quot;, &quot;.lookingglasstheatre.org&quot;, &quot;.lookpic.com&quot;, &quot;.hkreporter.loved.hk&quot;, &quot;.lrfz.com&quot;, &quot;.lsd.org.hk&quot;, &quot;.lsforum.net&quot;, &quot;.lsm.org&quot;, &quot;.lsmchinese.org&quot;, &quot;.lsmkorean.org&quot;, &quot;.lupm.org&quot;, &quot;.lvhai.org&quot;, &quot;.mh4u.org&quot;, &quot;.m-team.cc&quot;, &quot;.www.macrovpn.com&quot;, &quot;.mad-ar.ch&quot;, &quot;.marc.info&quot;, &quot;.marguerite.su&quot;, &quot;.martincartoons.com&quot;, &quot;.maiio.net&quot;, &quot;.mail-archive.com&quot;, &quot;.malaysiakini.com&quot;, &quot;.makemymood.com&quot;, &quot;.marines.mil&quot;, &quot;.martau.com&quot;, &quot;.maruta.be&quot;, &quot;.marxist.com&quot;, &quot;.marxist.net&quot;, &quot;.marxists.org&quot;, &quot;.mashable.com&quot;, &quot;.matainja.com&quot;, &quot;.mathiew-badimon.com&quot;, &quot;.matsushimakaede.com&quot;, &quot;.mayimayi.com&quot;, &quot;.mcadforums.com&quot;, &quot;.mcfog.com&quot;, &quot;.md-t.org&quot;, &quot;.mediafire.com&quot;, &quot;.meetup.com&quot;, &quot;.mefeedia.com&quot;, &quot;.lich355.megabyet.net&quot;, &quot;.megaporn.com&quot;, &quot;.megarotic.com&quot;, &quot;.megavideo.com&quot;, &quot;.megurineluka.com&quot;, &quot;.meirixiaochao.com&quot;, &quot;.melon-peach.com&quot;, &quot;.memedia.cn&quot;, &quot;.memrijttm.org&quot;, &quot;.merit-times.com.tw&quot;, &quot;.mesotw.com&quot;, &quot;.metacafe.com&quot;, &quot;.meteorshowersonline.com&quot;, &quot;.metrolife.ca&quot;, &quot;.mgoon.com&quot;, &quot;.mgstage.com&quot;, &quot;.mhradio.org&quot;, &quot;.michaelanti.com&quot;, &quot;.michaelmarketl.com&quot;, &quot;.middle-way.net&quot;, &quot;.mihk.hk&quot;, &quot;.mihua.org&quot;, &quot;.mimivip.com&quot;, &quot;.minghui.org&quot;, &quot;.minghui-school.org&quot;, &quot;.mingjinglishi.com&quot;, &quot;.mingjingnews.com&quot;, &quot;.mingpao.com&quot;, &quot;.mingpaomonthly.com&quot;, &quot;.mingpaonews.com&quot;, &quot;.mingpaony.com&quot;, &quot;.mingpaosf.com&quot;, &quot;.mingpaotor.com&quot;, &quot;.mingpaovan.com&quot;, &quot;.mininova.org&quot;, &quot;.minzhuhua.net&quot;, &quot;.minzhuzhongguo.org&quot;, &quot;.miroguide.com&quot;, &quot;.mirrorbooks.com&quot;, &quot;.mitbbs.com&quot;, &quot;.mixero.com&quot;, &quot;.mixpod.com&quot;, &quot;.mixx.com&quot;, &quot;.mizzmona.com&quot;, &quot;.mk5000.com&quot;, &quot;.mlcool.com&quot;, &quot;.mmaaxx.com&quot;, &quot;.plurktop.mmdays.com&quot;, &quot;.mmmca.com&quot;, &quot;.mobatek.net&quot;, &quot;.mobile01.com&quot;, &quot;.mobileways.de&quot;, &quot;.mobypicture.com&quot;, &quot;.moby.to&quot;, &quot;.wiki.moegirl.org&quot;, &quot;.mog.com&quot;, &quot;.molihua.org&quot;, &quot;.mondex.org&quot;, &quot;.www.monlamit.org&quot;, &quot;.c1522.mooo.com&quot;, &quot;.monitorchina.org&quot;, &quot;.bbs.morbell.com&quot;, &quot;.morningsun.org&quot;, &quot;.movabletype.com&quot;, &quot;.moviefap.com&quot;, &quot;.www.moztw.org&quot;, &quot;.mp3ye.eu&quot;, &quot;.mpettis.com&quot;, &quot;.mpfinance.com&quot;, &quot;.mpinews.com&quot;, &quot;.mrtweet.com&quot;, &quot;.msn.com.tw&quot;, &quot;.msguancha.com&quot;, &quot;.mthruf.com&quot;, &quot;.multiply.com&quot;, &quot;.multiproxy.org&quot;, &quot;.forum.mymaji.com&quot;, &quot;.multiupload.com&quot;, &quot;.muouju.com&quot;, &quot;.muselinks.co.jp&quot;, &quot;.muzi.com&quot;, &quot;.muzi.net&quot;, &quot;.mx981.com&quot;, &quot;.my-proxy.com&quot;, &quot;.forum.my903.com&quot;, &quot;.myactimes.com&quot;, &quot;.myaudiocast.com&quot;, &quot;.myav.com.tw&quot;, &quot;.bbs.mychat.to&quot;, &quot;.mychinamyhome.com&quot;, &quot;.www.mycould.com&quot;, &quot;.myeclipseide.com&quot;, &quot;.myforum.com.hk&quot;, &quot;.myforum.com.uk&quot;, &quot;.myfreshnet.com&quot;, &quot;.myparagliding.com&quot;, &quot;.mypopescu.com&quot;, &quot;.mysinablog.com&quot;, &quot;.myspace.com&quot;, &quot;.naacoalition.org&quot;, &quot;.old.nabble.com&quot;, &quot;.naitik.net&quot;, &quot;.namsisi.com&quot;, &quot;.nanyang.com&quot;, &quot;.nanyangpost.com&quot;, &quot;.nanzao.com&quot;, &quot;.line.naver.jp&quot;, &quot;.navicat.com&quot;, &quot;.nakido.com&quot;, &quot;.naol.ca&quot;, &quot;.cyberghost.natado.com&quot;, &quot;.navy.mil&quot;, &quot;.nccwatch.org.tw&quot;, &quot;.nch.com.tw&quot;, &quot;.ncn.org&quot;, &quot;.etools.ncol.com&quot;, &quot;.www.ned.org&quot;, &quot;.nekoslovakia.net&quot;, &quot;.t.neolee.cn&quot;, &quot;.netcolony.com&quot;, &quot;.bolin.netfirms.com&quot;, &quot;.zh.netlog.com&quot;, &quot;.netme.cc&quot;, &quot;.networkedblogs.com&quot;, &quot;.neverforget8964.org&quot;, &quot;.new-3lunch.net&quot;, &quot;.new-akiba.com&quot;, &quot;.newcenturymc.com&quot;, &quot;.newcenturynews.com&quot;, &quot;.newchen.com&quot;, &quot;.newgrounds.com&quot;, &quot;.newlandmagazine.com.au&quot;, &quot;.news100.com.tw&quot;, &quot;.newscn.org&quot;, &quot;.newsminer.com&quot;, &quot;.newspeak.cc&quot;, &quot;.newsancai.com&quot;, &quot;.newtaiwan.com.tw&quot;, &quot;.newtalk.tw&quot;, &quot;.newyorktimes.com&quot;, &quot;.apple.nextmedia.com&quot;, &quot;.nexton-net.jp&quot;, &quot;.nexttv.com.tw&quot;, &quot;.nga.mil&quot;, &quot;.ngensis.com&quot;, &quot;.nicovideo.jp&quot;, &quot;.nighost.org&quot;, &quot;.nintendium.com&quot;, &quot;.dayaarmongol.ning.com&quot;, &quot;.taiwanyes.ning.com&quot;, &quot;.njactb.org&quot;, &quot;.njuice.com&quot;, &quot;.nlfreevpn.com&quot;, &quot;.nobelprize.org&quot;, &quot;.nobodycanstop.us&quot;, &quot;.nokogiri.org&quot;, &quot;.nokola.com&quot;, &quot;.noobbox.com&quot;, &quot;.novelasia.com&quot;, &quot;.nownews.com&quot;, &quot;.nowtorrents.com&quot;, &quot;.noypf.com&quot;, &quot;.npa.go.jp&quot;, &quot;.nps.gov&quot;, &quot;.nrk.no&quot;, &quot;.nsc.gov.tw&quot;, &quot;.ntdtv.co&quot;, &quot;.ntdtv.ca&quot;, &quot;.ntdtv.org&quot;, &quot;.ntdtv.ru&quot;, &quot;.ntu.edu.tw&quot;, &quot;.nuexpo.com&quot;, &quot;.nurgo-software.com&quot;, &quot;.nuvid.com&quot;, &quot;.nuzcom.com&quot;, &quot;.nydus.ca&quot;, &quot;.nyt.com&quot;, &quot;.nytco.com&quot;, &quot;.nytimes.com&quot;, &quot;.nysingtao.com&quot;, &quot;.nzchinese.net.nz&quot;, &quot;.observechina.net&quot;, &quot;.oclp.hk&quot;, &quot;.october-review.org&quot;, &quot;.offbeatchina.com&quot;, &quot;.ogaoga.org&quot;, &quot;.twtr2src.ogaoga.org&quot;, &quot;.oikos.com.tw&quot;, &quot;.oiktv.com&quot;, &quot;.oizoblog.com&quot;, &quot;.okayfreedom.com&quot;, &quot;.old-cat.net&quot;, &quot;.olumpo.com&quot;, &quot;.olympicwatch.org&quot;, &quot;.omgili.com&quot;, &quot;.omnitalk.com&quot;, &quot;.forum.omy.sg&quot;, &quot;.news.omy.sg&quot;, &quot;.showbiz.omy.sg&quot;, &quot;.the-sun.on.cc&quot;, &quot;.tv.on.cc&quot;, &quot;.onedrive.live.com&quot;, &quot;.onlylady.cn&quot;, &quot;.onmoon.net&quot;, &quot;.onmoon.com&quot;, &quot;.oopsforum.com&quot;, &quot;.open.com.hk&quot;, &quot;.opendemocracy.net&quot;, &quot;.myopenid.com&quot;, &quot;.openid.net&quot;, &quot;.blog.openinkpot.org&quot;, &quot;.openleaks.org&quot;, &quot;.openvpn.net&quot;, &quot;.openwebster.com&quot;, &quot;.help.opera.com&quot;, &quot;.my.opera.com&quot;, &quot;.demo.opera-mini.net&quot;, &quot;.opnir.com&quot;, &quot;.www.orchidbbs.com&quot;, &quot;.orient-doll.com&quot;, &quot;.orientaldaily.com.my&quot;, &quot;.orientaldaily.on.cc&quot;, &quot;.orn.jp&quot;, &quot;.t.orzdream.com&quot;, &quot;.tui.orzdream.com&quot;, &quot;.orzistic.org&quot;, &quot;.osfoora.com&quot;, &quot;.m.oulove.org&quot;, &quot;.ourdearamy.com&quot;, &quot;.oursogo.com&quot;, &quot;.oursteps.com.au&quot;, &quot;.xinqimeng.over-blog.com&quot;, &quot;.share.ovi.com&quot;, &quot;.owl.li&quot;, &quot;.ht.ly&quot;, &quot;.htl.li&quot;, &quot;.mash.to&quot;, &quot;.www.owind.com&quot;, &quot;.www.oxid.it&quot;, &quot;.oyax.com&quot;, &quot;.ozchinese.com&quot;, &quot;.ow.ly&quot;, &quot;.bbs.ozchinese.com&quot;, &quot;.ozyoyo.com&quot;, &quot;.pacificpoker.com&quot;, &quot;.packetix.net&quot;, &quot;.page2rss.com&quot;, &quot;.pagodabox.com&quot;, &quot;.paint.net&quot;, &quot;.coveringweb.com&quot;, &quot;.palacemoon.com&quot;, &quot;.forum.palmislife.com&quot;, &quot;.paper-replika.com&quot;, &quot;.eriversoft.com&quot;, &quot;.paper.li&quot;, &quot;.paperb.us&quot;, &quot;.panluan.net&quot;, &quot;.panoramio.com&quot;, &quot;.parade.com&quot;, &quot;.pastebin.com&quot;, &quot;.pastie.org&quot;, &quot;.blog.pathtosharepoint.com&quot;, &quot;.pbs.org&quot;, &quot;.pbwiki.com&quot;, &quot;.pbworks.com&quot;, &quot;.developers.box.net&quot;, &quot;.wiki.oauth.net&quot;, &quot;.wiki.phonegap.com&quot;, &quot;.wiki.jqueryui.com&quot;, &quot;.pbxes.com&quot;, &quot;.pbxes.org&quot;, &quot;.pcdiscuss.com&quot;, &quot;.pcdvd.com.tw&quot;, &quot;.pchome.com.tw&quot;, &quot;.pct.org.tw&quot;, &quot;.pdetails.com&quot;, &quot;.pdproxy.com&quot;, &quot;.peacefire.org&quot;, &quot;.peacehall.com&quot;, &quot;.peeasian.com&quot;, &quot;.pekingduck.org&quot;, &quot;.penchinese.com&quot;, &quot;.penchinese.net&quot;, &quot;.pengyulong.com&quot;, &quot;.blog.pentalogic.net&quot;, &quot;.penthouse.com&quot;, &quot;.peopo.org&quot;, &quot;.percy.in&quot;, &quot;.perfectvpn.net&quot;, &quot;.perfspot.com&quot;, &quot;.perlhowto.com&quot;, &quot;.philly.com&quot;, &quot;.photofocus.com&quot;, &quot;.phuquocservices.com&quot;, &quot;.picidae.net&quot;, &quot;.picturesocial.com&quot;, &quot;.pidown.com&quot;, &quot;.pign.net&quot;, &quot;.blog.pilotmoon.com&quot;, &quot;.pin6.com&quot;, &quot;.ping.fm&quot;, &quot;.pinoy-n.com&quot;, &quot;.piring.com&quot;, &quot;.pixelqi.com&quot;, &quot;.css.pixnet.in&quot;, &quot;.pixnet.net&quot;, &quot;.pk.com&quot;, &quot;.placemix.com&quot;, &quot;.planetsuzy.org&quot;, &quot;.pictures.playboy.com&quot;, &quot;.playboy.com&quot;, &quot;.plays.com.tw&quot;, &quot;.m.plixi.com&quot;, &quot;.plm.org.hk&quot;, &quot;.plunder.com&quot;, &quot;.plus28.com&quot;, &quot;.plusbb.com&quot;, &quot;.pmates.com&quot;, &quot;.po2b.com&quot;, &quot;.podictionary.com&quot;, &quot;.pokerstars.com&quot;, &quot;.zh.pokerstrategy.com&quot;, &quot;.politicalchina.org&quot;, &quot;.popularpages.net&quot;, &quot;.popyard.com&quot;, &quot;.popyard.org&quot;, &quot;.porn.com&quot;, &quot;.porn2.com&quot;, &quot;.pornbase.org&quot;, &quot;.pornhub.com&quot;, &quot;.pornmm.net&quot;, &quot;.pornoxo.com&quot;, &quot;.pornrapidshare.com&quot;, &quot;.pornstarclub.com&quot;, &quot;.porntube.com&quot;, &quot;.pornvisit.com&quot;, &quot;.postadult.com&quot;, &quot;.powercx.com&quot;, &quot;.www.powerpointninja.com&quot;, &quot;.pts.org.tw&quot;, &quot;.pubu.com.tw&quot;, &quot;.puffinbrowser.com&quot;, &quot;.post.ly&quot;, &quot;.posterous.com&quot;, &quot;.post.anyu.org&quot;, &quot;.bralio.com&quot;, &quot;.calebelston.com&quot;, &quot;.designerol.com&quot;, &quot;.blog.fizzik.com&quot;, &quot;.nf.id.au&quot;, &quot;.markmilian.com&quot;, &quot;.log.riku.me&quot;, &quot;.sogrady.me&quot;, &quot;.vatn.org&quot;, &quot;.veempiire.com&quot;, &quot;.www.vegorpedersen.com&quot;, &quot;.ventureswell.com&quot;, &quot;.webfee.tk&quot;, &quot;.whereiswerner.com&quot;, &quot;.zhong.pp.ru&quot;, &quot;.power.com&quot;, &quot;.powerapple.com&quot;, &quot;.abc.pp.ru&quot;, &quot;.heix.pp.ru&quot;, &quot;.prayforchina.net&quot;, &quot;.premeforwindows7.com&quot;, &quot;.presentationzen.com&quot;, &quot;.prestige-av.com&quot;, &quot;.privacybox.de&quot;, &quot;.privateinternetaccess.com&quot;, &quot;.privatepaste.com&quot;, &quot;.privatetunnel.com&quot;, &quot;.procopytips.com&quot;, &quot;.provideocoalition.com&quot;, &quot;.prosiben.de&quot;, &quot;.proxifier.com&quot;, &quot;.api.proxlet.com&quot;, &quot;.proxomitron.info&quot;, &quot;.proxy.org&quot;, &quot;.proxypy.net&quot;, &quot;.proxyroad.com&quot;, &quot;.prozz.net&quot;, &quot;.psblog.name&quot;, &quot;.psiphon.ca&quot;, &quot;.ptt.cc&quot;, &quot;.puffstore.com&quot;, &quot;.pullfolio.com&quot;, &quot;.pureconcepts.net&quot;, &quot;.purepdf.com&quot;, &quot;.purevpn.com&quot;, &quot;.putlocker.com&quot;, &quot;.pwned.com&quot;, &quot;.python.com&quot;, &quot;.python.com.tw&quot;, &quot;.qanote.com&quot;, &quot;.qi-gong.me&quot;, &quot;.qienkuen.org&quot;, &quot;.qixianglu.cn&quot;, &quot;.bbs.qmzdd.com&quot;, &quot;.qkshare.com&quot;, &quot;.qoos.com&quot;, &quot;.efksoft.com&quot;, &quot;.qstatus.com&quot;, &quot;.qtweeter.com&quot;, &quot;.qtrac.eu&quot;, &quot;.quadedge.com&quot;, &quot;.www.getyouram.com&quot;, &quot;.hiitch.com&quot;, &quot;.qusi8.net&quot;, &quot;.qvodzy.org&quot;, &quot;.qxbbs.org&quot;, &quot;.radioaustralia.net.au&quot;, &quot;.opml.radiotime.com&quot;, &quot;.radiovaticana.org&quot;, &quot;.raidcall.com.tw&quot;, &quot;.rangzen.org&quot;, &quot;.ranyunfei.com&quot;, &quot;.rapbull.net&quot;, &quot;.rapidshare8.com&quot;, &quot;.rapidsharedata.com&quot;, &quot;.rcinet.ca&quot;, &quot;.read100.com&quot;, &quot;.readingtimes.com.tw&quot;, &quot;.realraptalk.com&quot;, &quot;.recordhistory.org&quot;, &quot;.redtube.com&quot;, &quot;.referer.us&quot;, &quot;.reflectivecode.com&quot;, &quot;.relaxbbs.com&quot;, &quot;.renminbao.com&quot;, &quot;.renyurenquan.org&quot;, &quot;.subacme.rerouted.org&quot;, &quot;.cn.reuters.com&quot;, &quot;.revleft.com&quot;, &quot;.retweetist.com&quot;, &quot;.retweetrank.com&quot;, &quot;.connectedchina.reuters.com&quot;, &quot;.www.reuters.com&quot;, &quot;.revver.com&quot;, &quot;.rfa.org&quot;, &quot;.rfachina.com&quot;, &quot;.rfamobile.org&quot;, &quot;.rferl.org&quot;, &quot;.rfi.fr&quot;, &quot;.rfi.my&quot;, &quot;.rhcloud.com&quot;, &quot;.rileyguide.com&quot;, &quot;.riku.me&quot;, &quot;.rlwlw.com&quot;, &quot;.chinese.rnw.nl&quot;, &quot;.rnw.nl&quot;, &quot;.robtex.com&quot;, &quot;.robustnessiskey.com&quot;, &quot;.rocmp.org&quot;, &quot;.rojo.com&quot;, &quot;.ronjoneswriter.com&quot;, &quot;.roodo.com&quot;, &quot;.rsf.org&quot;, &quot;.rsf-chinese.org&quot;, &quot;.rssmeme.com&quot;, &quot;.rthk.hk&quot;, &quot;.rthk.org.hk&quot;, &quot;.rti.org.tw&quot;, &quot;.rushbee.com&quot;, &quot;.rutube.ru&quot;, &quot;.ruyiseek.com&quot;, &quot;.rxhj.net&quot;, &quot;.blog.s135.com&quot;, &quot;.s1heng.com&quot;, &quot;.s8forum.com&quot;, &quot;.sacom.hk&quot;, &quot;.sadpanda.us&quot;, &quot;.saiq.me&quot;, &quot;.salvation.org.hk&quot;, &quot;.samair.ru&quot;, &quot;.sammyjs.org&quot;, &quot;.sandnoble.com&quot;, &quot;.sankaizok.com&quot;, &quot;.sanmin.com.tw&quot;, &quot;.sapikachu.net&quot;, &quot;.savemedia.com&quot;, &quot;.savetibet.org&quot;, &quot;.savevid.com&quot;, &quot;.say2.info&quot;, &quot;.scmp.com&quot;, &quot;.scmpchinese.com&quot;, &quot;.scribd.com&quot;, &quot;.scriptspot.com&quot;, &quot;.seapuff.com&quot;, &quot;.domainhelp.search.com&quot;, &quot;.secretchina.com&quot;, &quot;.secretgarden.no&quot;, &quot;.default.secureserver.net&quot;, &quot;.securitykiss.com&quot;, &quot;.seesmic.com&quot;, &quot;.seevpn.com&quot;, &quot;.seezone.net&quot;, &quot;.sejie.com&quot;, &quot;.sendspace.com&quot;, &quot;.tweets.seraph.me&quot;, &quot;.sesawe.net&quot;, &quot;.sesawe.org&quot;, &quot;.sethwklein.net&quot;, &quot;.setty.com.tw&quot;, &quot;.sevenload.com&quot;, &quot;.sex.com&quot;, &quot;.sex-11.com&quot;, &quot;.sex8.cc&quot;, &quot;.sexandsubmission.com&quot;, &quot;.sexhu.com&quot;, &quot;.sexhuang.com&quot;, &quot;.sexinsex.net&quot;, &quot;.sf.net&quot;, &quot;.sfileydy.com&quot;, &quot;.shadow.ma&quot;, &quot;.shadowsocks.org&quot;, &quot;.shahamat-english.com&quot;, &quot;.shangfang.org&quot;, &quot;.shapeservices.com&quot;, &quot;.sharebee.com&quot;, &quot;.sharecool.org&quot;, &quot;.sharkdolphin.com&quot;, &quot;.sharpdaily.com.hk&quot;, &quot;.sharpdaily.hk&quot;, &quot;.shaunthesheep.com&quot;, &quot;.sheikyermami.com&quot;, &quot;.shellmix.com&quot;, &quot;.shenshou.org&quot;, &quot;.shenyunperformingarts.org&quot;, &quot;.shenzhoufilm.com&quot;, &quot;.shinychan.com&quot;, &quot;.shitaotv.org&quot;, &quot;.shixiao.org&quot;, &quot;.shizhao.org&quot;, &quot;.shkspr.mobi&quot;, &quot;.shodanhq.com&quot;, &quot;.shopping.com&quot;, &quot;.showtime.jp&quot;, &quot;.ch.shvoong.com&quot;, &quot;.shwchurch3.com&quot;, &quot;.simplecd.org&quot;, &quot;.simpleproductivityblog.com&quot;, &quot;.bbs.sina.com&quot;, &quot;.sina.com.tw&quot;, &quot;.dailynews.sina.com&quot;, &quot;.sina.com.hk&quot;, &quot;.home.sina.com&quot;, &quot;.singtao.com&quot;, &quot;.news.singtao.ca&quot;, &quot;.sinica.edu.tw&quot;, &quot;.sino-monthly.com&quot;, &quot;.sinocast.com&quot;, &quot;.sinocism.com&quot;, &quot;.sinomontreal.ca&quot;, &quot;.sinonet.ca&quot;, &quot;.sinopitt.info&quot;, &quot;.sinoants.com&quot;, &quot;.sinoquebec.com&quot;, &quot;.site90.net&quot;, &quot;.sitebro.tw&quot;, &quot;.siteks.uk.to&quot;, &quot;.sitemaps.org&quot;, &quot;.sitetag.us&quot;, &quot;.sis.xxx&quot;, &quot;.sis001.com&quot;, &quot;.sis001.us&quot;, &quot;.sjum.cn&quot;, &quot;.skimtube.com&quot;, &quot;.skybet.com&quot;, &quot;.skyhighpremium.com&quot;, &quot;.bbs.skykiwi.com&quot;, &quot;.www.skype.com&quot;, &quot;.share.skype.com&quot;, &quot;.xskywalker.com&quot;, &quot;.m.slandr.net&quot;, &quot;.slavasoft.com&quot;, &quot;.slheng.com&quot;, &quot;.slideshare.net&quot;, &quot;.slime.com.tw&quot;, &quot;.slutload.com&quot;, &quot;.smhric.org&quot;, &quot;.so-ga.net&quot;, &quot;.so-news.com&quot;, &quot;.so-net.net.tw&quot;, &quot;.soc.mil&quot;, &quot;.sockslist.net&quot;, &quot;.sod.co.jp&quot;, &quot;.softether.org&quot;, &quot;.softether-download.com&quot;, &quot;.sogclub.com&quot;, &quot;.sohcradio.com&quot;, &quot;.www.somee.com&quot;, &quot;.sorting-algorithms.com&quot;, &quot;.soumo.info&quot;, &quot;.soup.io&quot;, &quot;.slinkset.com&quot;, &quot;.slickvpn.com&quot;, &quot;.snaptu.com&quot;, &quot;.sneakme.net&quot;, &quot;.snooper.co.uk&quot;, &quot;.sobees.com&quot;, &quot;.socialwhale.com&quot;, &quot;.softether.co.jp&quot;, &quot;.softwarebychuck.com&quot;, &quot;.blog.sogoo.org&quot;, &quot;.soh.tw&quot;, &quot;.sohfrance.org&quot;, &quot;.chinese.soifind.com&quot;, &quot;.sokamonline.com&quot;, &quot;.somee.com&quot;, &quot;.songjianjun.com&quot;, &quot;.sopcast.com&quot;, &quot;.sopcast.org&quot;, &quot;.soundcloud.com&quot;, &quot;.soundofhope.org&quot;, &quot;.soupofmedia.com&quot;, &quot;.sourceforge.net&quot;, &quot;.southnews.com.tw&quot;, &quot;.sowers.org.hk&quot;, &quot;.wlx.sowiki.net&quot;, &quot;.space-scape.com&quot;, &quot;.spankwire.com&quot;, &quot;.spb.com&quot;, &quot;.speedpluss.org&quot;, &quot;.spencertipping.com&quot;, &quot;.spinejs.com&quot;, &quot;.sproutcore.com&quot;, &quot;.squarespace.com&quot;, &quot;.ssh91.com&quot;, &quot;.cdn.sstatic.net&quot;, &quot;.www.stackfile.com&quot;, &quot;.usinfo.state.gov&quot;, &quot;.starp2p.com&quot;, &quot;.startpage.com&quot;, &quot;.state168.com&quot;, &quot;.steel-storm.com&quot;, &quot;.sthoo.com&quot;, &quot;.stickam.com&quot;, &quot;.stickeraction.com&quot;, &quot;.stonegames.net&quot;, &quot;.stoneip.info&quot;, &quot;.storagenewsletter.com&quot;, &quot;.stoptibetcrisis.net&quot;, &quot;.stoweboyd.com&quot;, &quot;.streamingthe.net&quot;, &quot;.cn.streetvoice.com&quot;, &quot;.cn2.streetvoice.com&quot;, &quot;.tw.streetvoice.com&quot;, &quot;.strongvpn.com&quot;, &quot;.student.tw&quot;, &quot;.stupidvideos.com&quot;, &quot;.sufeng.org&quot;, &quot;.sugarsync.com&quot;, &quot;.summify.com&quot;, &quot;.suoluo.org&quot;, &quot;.api.supertweet.net&quot;, &quot;.www.supertweet.net&quot;, &quot;.surfeasy.com.au&quot;, &quot;.svwind.com&quot;, &quot;.sweux.com&quot;, &quot;.swift-tools.net&quot;, &quot;.sydneytoday.com&quot;, &quot;.syncback.com&quot;, &quot;.sysadmin1138.net&quot;, &quot;.sysresccd.org&quot;, &quot;.sytes.net&quot;, &quot;.blog.syx86.com&quot;, &quot;.blog.syx86.cn&quot;, &quot;.szbbs.net&quot;, &quot;.szetowah.org.hk&quot;, &quot;.t35.com&quot;, &quot;.t66y.com&quot;, &quot;.taa-usa.org&quot;, &quot;.tabtter.jp&quot;, &quot;.tacem.org&quot;, &quot;.tafaward.com&quot;, &quot;.tagwalk.com&quot;, &quot;.taipei.gov.tw&quot;, &quot;.taipeisociety.org&quot;, &quot;.taiwandaily.net&quot;, &quot;.taiwantt.org.tw&quot;, &quot;.taiwankiss.com&quot;, &quot;.taiwannation.com&quot;, &quot;.taiwannation.com.tw&quot;, &quot;.taiwannews.com.tw&quot;, &quot;.taiwanus.net&quot;, &quot;.taiwanyes.com&quot;, &quot;.taiwan-sex.com&quot;, &quot;.tamiaode.tk&quot;, &quot;.tanc.org&quot;, &quot;.tangben.com&quot;, &quot;.taolun.info&quot;, &quot;.blog.taragana.com&quot;, &quot;.taweet.com&quot;, &quot;.tbpic.info&quot;, &quot;.tchrd.org&quot;, &quot;.teamseesmic.com&quot;, &quot;.teashark.com&quot;, &quot;.techlifeweb.com&quot;, &quot;.techparaiso.com&quot;, &quot;.teck.in&quot;, &quot;.telecomspace.com&quot;, &quot;.telegraph.co.uk&quot;, &quot;.tenacy.com&quot;, &quot;.theampfactory.com&quot;, &quot;.theappleblog.com&quot;, &quot;.theatrum-belli.com&quot;, &quot;.thebodyshop-usa.com&quot;, &quot;.theblemish.com&quot;, &quot;.thebcomplex.com&quot;, &quot;.thechinabeat.org&quot;, &quot;.thedieline.com&quot;, &quot;.thedw.us&quot;, &quot;.thegatesnotes.com&quot;, &quot;.thehousenews.com&quot;, &quot;.thehun.net&quot;, &quot;.thelifeyoucansave.com&quot;, &quot;.thelius.org&quot;, &quot;.thepiratebay.org&quot;, &quot;.thepiratebay.se&quot;, &quot;.theqii.info&quot;, &quot;.thereallove.kr&quot;, &quot;.thesartorialist.com&quot;, &quot;.thespeeder.com&quot;, &quot;.thetibetpost.com&quot;, &quot;.thetrotskymovie.com&quot;, &quot;.thevivekspot.com&quot;, &quot;.thisav.com&quot;, &quot;.thkphoto.com&quot;, &quot;.thomasbernhard.org&quot;, &quot;.threatchaos.com&quot;, &quot;.throughnightsfire.com&quot;, &quot;.thumbzilla.com&quot;, &quot;.tiananmenmother.org&quot;, &quot;.tiananmenuniv.com&quot;, &quot;.tiananmenuniv.net&quot;, &quot;.tiandixing.org&quot;, &quot;.tianhuayuan.com&quot;, &quot;.tiantibooks.org&quot;, &quot;.tianzhu.org&quot;, &quot;.tibet.com&quot;, &quot;.tibet.net&quot;, &quot;.tibet.org.tw&quot;, &quot;.tibetalk.com&quot;, &quot;.tibetanyouthcongress.org&quot;, &quot;.tibetfund.org&quot;, &quot;.tibetonline.com&quot;, &quot;.tibetonline.tv&quot;, &quot;.tibetwrites.org&quot;, &quot;.time.com&quot;, &quot;.blog.tiney.com&quot;, &quot;.tinychat.com&quot;, &quot;.tinypaste.com&quot;, &quot;.tidyread.com&quot;, &quot;.tistory.com&quot;, &quot;.tkcs-collins.com&quot;, &quot;.tkforum.tk&quot;, &quot;.cn.tmagazine.com&quot;, &quot;.tmi.me&quot;, &quot;.tnaflix.com&quot;, &quot;.togetter.com&quot;, &quot;.tokyo-247.com&quot;, &quot;.tokyo-hot.com&quot;, &quot;.tokyocn.com&quot;, &quot;.tonyyan.net&quot;, &quot;.toodoc.com&quot;, &quot;.toonel.net&quot;, &quot;.topnews.in&quot;, &quot;.topshare.us&quot;, &quot;.topshareware.com&quot;, &quot;.topstyle4.com&quot;, &quot;.topsy.com&quot;, &quot;.tora.to&quot;, &quot;.torproject.org&quot;, &quot;.torrentcrazy.com&quot;, &quot;.torvpn.com&quot;, &quot;.touch99.com&quot;, &quot;.toutfr.com&quot;, &quot;.tpi.org.tw&quot;, &quot;.transgressionism.org&quot;, &quot;.travelinlocal.com&quot;, &quot;.trendsmap.com&quot;, &quot;.trialofccp.org&quot;, &quot;.tripod.com&quot;, &quot;.trtc.com.tw&quot;, &quot;.trulyergonomic.com&quot;, &quot;.trustedbi.com&quot;, &quot;.truth101.co.tv&quot;, &quot;.truthcn.com&quot;, &quot;.truveo.com&quot;, &quot;.tsemtulku.com&quot;, &quot;.tsquare.tv&quot;, &quot;.tsunagarumon.com&quot;, &quot;.tsctv.net&quot;, &quot;.tt1069.com&quot;, &quot;.tttan.com&quot;, &quot;.ttv.com.tw&quot;, &quot;.tuanzt.com&quot;, &quot;.tube.com&quot;, &quot;.tube8.com&quot;, &quot;.tubecao.com&quot;, &quot;.tubewolf.com&quot;, &quot;.tuidang.net&quot;, &quot;.tuidang.org&quot;, &quot;.bbs.tuitui.info&quot;, &quot;.tumutanzi.com&quot;, &quot;.tunein.com&quot;, &quot;.tunnelbear.com&quot;, &quot;.turbobit.net&quot;, &quot;.turningtorso.com&quot;, &quot;.tuxtraining.com&quot;, &quot;.301works.org&quot;, &quot;.365singles.com.ar&quot;, &quot;.all-that-is-interesting.com&quot;, &quot;.art-or-porn.com&quot;, &quot;.news.atebits.com&quot;, &quot;.tumblr.awflasher.com&quot;, &quot;.badassjs.com&quot;, &quot;.basetimesheightdividedby2.com&quot;, &quot;.benjaminste.in&quot;, &quot;.blog.birdhouseapp.com&quot;, &quot;.bobulate.com&quot;, &quot;.bonjourlesgeeks.com&quot;, &quot;.bookshelfporn.com&quot;, &quot;.blog.boxcar.io&quot;, &quot;.blog.bitly.com&quot;, &quot;.chevronwp7.com&quot;, &quot;.clientsfromhell.net&quot;, &quot;.codeboxapp.com&quot;, &quot;.cookingtothegoodlife.com&quot;, &quot;.cubicle17.com&quot;, &quot;.photos.dailyme.com&quot;, &quot;.davidslog.com&quot;, &quot;.blog.davidziegler.net&quot;, &quot;.blog.dayoneapp.com&quot;, &quot;.drewolanoff.com&quot;, &quot;.blog.dribbble.com&quot;, &quot;.chaos.e-spacy.com&quot;, &quot;.eamonnbrennan.com&quot;, &quot;.everyday-carry.com&quot;, &quot;.eyespirit.info&quot;, &quot;.life.fly4ever.me&quot;, &quot;.fredwilson.vc&quot;, &quot;.fuckgfw.com&quot;, &quot;.geekmade.co.uk&quot;, &quot;.generesis.com&quot;, &quot;.news.ghostery.com&quot;, &quot;.givemesomethingtoread.com&quot;, &quot;.blog.gowalla.com&quot;, &quot;.heiyo.info&quot;, &quot;.hellonewyork.us&quot;, &quot;.blog.hotpotato.com&quot;, &quot;.ialmostlaugh.com&quot;, &quot;.blog.ifttt.com&quot;, &quot;.blog.instagram.com&quot;, &quot;.blog.instapaper.com&quot;, &quot;.interestinglaugh.com&quot;, &quot;.blog.iphone-dev.org&quot;, &quot;.jayparkinsonmd.com&quot;, &quot;.blog.joeyrobert.org&quot;, &quot;.kt.kcome.org&quot;, &quot;.my.keso.cn&quot;, &quot;.blog.kickstarter.com&quot;, &quot;.blog.kl.am&quot;, &quot;.blog.klip.me&quot;, &quot;.t.kun.im&quot;, &quot;.blog.lightbox.com&quot;, &quot;.littlebigdetails.com&quot;, &quot;.lovequicksilver.com&quot;, &quot;.lyricsquote.com&quot;, &quot;.madmenunbuttoned.com&quot;, &quot;.marco.org&quot;, &quot;.minimalmac.com&quot;, &quot;.mixedmedialabs.com&quot;, &quot;.modfetish.com&quot;, &quot;.blog.mongodb.org&quot;, &quot;.navigeaters.com&quot;, &quot;.london.neighborhoodr.com&quot;, &quot;.blog.path.com&quot;, &quot;.parislemon.com&quot;, &quot;.blog.pikchur.com&quot;, &quot;.blog.rockmelt.com&quot;, &quot;.blog.romanandreg.com&quot;, &quot;.solozorro.tk&quot;, &quot;.blog.sparrowmailapp.com&quot;, &quot;.stuffimreading.com&quot;, &quot;.blog.summify.com&quot;, &quot;.thedailywh.at&quot;, &quot;.theinternetwishlist.com&quot;, &quot;.thisiswhyyouarefat.com&quot;, &quot;.www.tiffanyarment.com&quot;, &quot;.tjholowaychuk.com&quot;, &quot;.tomsc.com&quot;, &quot;.blog.topify.com&quot;, &quot;.thehungrydudes.com&quot;, &quot;.tumblweed.org&quot;, &quot;.status.twhirl.org&quot;, &quot;.blog.usa.gov&quot;, &quot;.photo.utom.us&quot;, &quot;.v-state.org&quot;, &quot;.wellplacedpixels.com&quot;, &quot;.whydidyoubuymethat.com&quot;, &quot;.wordboner.com&quot;, &quot;.wordsandturds.com&quot;, &quot;.worstthingieverate.com&quot;, &quot;.xmusic.fm&quot;, &quot;.xuzhuoer.com&quot;, &quot;.bd.zhe.la&quot;, &quot;.cocoa.zonble.net&quot;, &quot;.tv.com&quot;, &quot;.www.tv.com&quot;, &quot;.tv-intros.com&quot;, &quot;.tvants.com&quot;, &quot;.forum.tvb.com&quot;, &quot;.tvboxnow.com&quot;, &quot;.tvider.com&quot;, &quot;.tvunetworks.com&quot;, &quot;.twa.sh&quot;, &quot;.twapperkeeper.com&quot;, &quot;.twaud.io&quot;, &quot;.twbbs.net.tw&quot;, &quot;.twbbs.org&quot;, &quot;.twbbs.tw&quot;, &quot;.twblogger.com&quot;, &quot;.tweepmag.com&quot;, &quot;.tweepml.org&quot;, &quot;.tweetbackup.com&quot;, &quot;.tweetboard.com&quot;, &quot;.tweetboner.biz&quot;, &quot;.tweetdeck.com&quot;, &quot;.deck.ly&quot;, &quot;.tweete.net&quot;, &quot;.m.tweete.net&quot;, &quot;.mtw.tl&quot;, &quot;.tweetedtimes.com&quot;, &quot;.tweetmeme.com&quot;, &quot;.tweetmylast.fm&quot;, &quot;.tweetphoto.com&quot;, &quot;.tweetrans.com&quot;, &quot;.tweetree.com&quot;, &quot;.tweetwally.com&quot;, &quot;.tweetymail.com&quot;, &quot;.twftp.org&quot;, &quot;.twibase.com&quot;, &quot;.twibble.de&quot;, &quot;.twibbon.com&quot;, &quot;.twibs.com&quot;, &quot;.twicsy.com&quot;, &quot;.twifan.com&quot;, &quot;.twiffo.com&quot;, &quot;.twilog.org&quot;, &quot;.twimbow.com&quot;, &quot;.twindexx.com&quot;, &quot;.twipple.jp&quot;, &quot;.twip.me&quot;, &quot;.twistar.cc&quot;, &quot;.twisternow.com&quot;, &quot;.twistory.net&quot;, &quot;.twitbrowser.net&quot;, &quot;.twitcause.com&quot;, &quot;.twitgether.com&quot;, &quot;.twiggit.org&quot;, &quot;.twitgoo.com&quot;, &quot;.twitiq.com&quot;, &quot;.twitlonger.com&quot;, &quot;.tl.gd&quot;, &quot;.twitoaster.com&quot;, &quot;.twitonmsn.com&quot;, &quot;.twitpic.com&quot;, &quot;.twitreferral.com&quot;, &quot;.twit2d.com&quot;, &quot;.twitstat.com&quot;, &quot;.dotheyfolloweachother.com&quot;, &quot;.firstfivefollowers.com&quot;, &quot;.retweeteffect.com&quot;, &quot;.tweeplike.me&quot;, &quot;.tweepguide.com&quot;, &quot;.turbotwitter.com&quot;, &quot;.twitvid.com&quot;, &quot;.t.co&quot;, &quot;.twt.tl&quot;, &quot;.twimg.com&quot;, &quot;.twittbot.net&quot;, &quot;.twitter.com&quot;, &quot;.twitter.jp&quot;, &quot;.twttr.com&quot;, &quot;.twitter4j.org&quot;, &quot;.twittercounter.com&quot;, &quot;.twitterfeed.com&quot;, &quot;.twittergadget.com&quot;, &quot;.twitterkr.com&quot;, &quot;.twittermail.com&quot;, &quot;.twittertim.es&quot;, &quot;.twitthat.com&quot;, &quot;.twitturly.com&quot;, &quot;.twitzap.com&quot;, &quot;.twiyia.com&quot;, &quot;.twreg.info&quot;, &quot;.twstar.net&quot;, &quot;.twtkr.com&quot;, &quot;.twtrland.com&quot;, &quot;.twurl.nl&quot;, &quot;.twyac.org&quot;, &quot;.tycool.com&quot;, &quot;.tynsoe.org&quot;, &quot;.tzangms.com&quot;, &quot;.typepad.com&quot;, &quot;.blog.expofutures.com&quot;, &quot;.legaltech.law.com&quot;, &quot;.www.loiclemeur.com&quot;, &quot;.latimesblogs.latimes.com&quot;, &quot;.blog.palm.com&quot;, &quot;.blogs.tampabay.com&quot;, &quot;.contests.twilio.com&quot;, &quot;.embr.in&quot;, &quot;.guomin.us&quot;, &quot;.srcf.ucam.org&quot;, &quot;.ucdc1998.org&quot;, &quot;.uderzo.it&quot;, &quot;.udn.com&quot;, &quot;.ufreevpn.com&quot;, &quot;.ugo.com&quot;, &quot;.uhrp.org&quot;, &quot;.uighurbiz.net&quot;, &quot;.ulike.net&quot;, &quot;.www.ukchinese.com&quot;, &quot;.ukliferadio.co.uk&quot;, &quot;.ultravpn.fr&quot;, &quot;.ultraxs.com&quot;, &quot;.unblock.cn.com&quot;, &quot;.uncyclomedia.org&quot;, &quot;.uncyclopedia.info&quot;, &quot;.unholyknight.com&quot;, &quot;.uni.cc&quot;, &quot;.unicode.org&quot;, &quot;.uniteddaily.com.my&quot;, &quot;.unix100.com&quot;, &quot;.unknownspace.org&quot;, &quot;.unpo.org&quot;, &quot;.uocn.org&quot;, &quot;.tor.updatestar.com&quot;, &quot;.upload4u.info&quot;, &quot;.uploaded.to&quot;, &quot;.uploadstation.com&quot;, &quot;.www.urbanoutfitters.com&quot;, &quot;.url.com.tw&quot;, &quot;.urlborg.com&quot;, &quot;.urlparser.com&quot;, &quot;.us.to&quot;, &quot;.usacn.com&quot;, &quot;.beta.usejump.com&quot;, &quot;.usfk.mil&quot;, &quot;.earthquake.usgs.gov&quot;, &quot;.usmc.mil&quot;, &quot;.ustream.tv&quot;, &quot;.uushare.com&quot;, &quot;.uwants.com&quot;, &quot;.uwants.net&quot;, &quot;.uyghurcongress.org&quot;, &quot;.uygur.org&quot;, &quot;.v70.us&quot;, &quot;.vaayoo.com&quot;, &quot;.value-domain.com&quot;, &quot;.van698.com&quot;, &quot;.vanemu.cn&quot;, &quot;.vanilla-jp.com&quot;, &quot;.vansky.com&quot;, &quot;.vapurl.com&quot;, &quot;.vcf-online.org&quot;, &quot;.vcfbuilder.org&quot;, &quot;.velkaepocha.sk&quot;, &quot;.veoh.com&quot;, &quot;.verizon.net&quot;, &quot;.verybs.com&quot;, &quot;.vft.com.tw&quot;, &quot;.videobam.com&quot;, &quot;.videomo.com&quot;, &quot;.vidoemo.com&quot;, &quot;.viki.com&quot;, &quot;.vimeo.com&quot;, &quot;.vimgolf.com&quot;, &quot;.vimperator.org&quot;, &quot;.vincnd.com&quot;, &quot;.vinniev.com&quot;, &quot;.video.tiscali.it&quot;, &quot;.vmixcore.com&quot;, &quot;.cn.voa.mobi&quot;, &quot;.tw.voa.mobi&quot;, &quot;.voachineseblog.com&quot;, &quot;.voagd.com&quot;, &quot;.voacantonese.com&quot;, &quot;.voachinese.com&quot;, &quot;.voatibetan.com&quot;, &quot;.voanews.com&quot;, &quot;.vocn.tv&quot;, &quot;.vot.org&quot;, &quot;.www.voy.com&quot;, &quot;.www.vpncup.com&quot;, &quot;.vpnbook.com&quot;, &quot;.vpnfire.com&quot;, &quot;.vpngate.jp&quot;, &quot;.vpngate.net&quot;, &quot;.vpnpop.com&quot;, &quot;.vpnpronet.com&quot;, &quot;.vtunnel.com&quot;, &quot;.lists.w3.org&quot;, &quot;.waffle1999.com&quot;, &quot;.jyzj.waqn.com&quot;, &quot;.wahas.com&quot;, &quot;.waigaobu.com&quot;, &quot;.waikeung.org&quot;, &quot;.waiwaier.com&quot;, &quot;.wallornot.org&quot;, &quot;.wallpapercasa.com&quot;, &quot;.www.wan-press.org&quot;, &quot;.wanderinghorse.net&quot;, &quot;.wangafu.net&quot;, &quot;.wangjinbo.org&quot;, &quot;.wanglixiong.com&quot;, &quot;.wangruoshui.net&quot;, &quot;.www.wangruowang.org&quot;, &quot;.want-daily.com&quot;, &quot;.wapedia.mobi&quot;, &quot;.makzhou.warehouse333.com&quot;, &quot;.washeng.net&quot;, &quot;.wattpad.com&quot;, &quot;.wearn.com&quot;, &quot;.hudatoriq.web.id&quot;, &quot;.web2project.net&quot;, &quot;.webbang.net&quot;, &quot;.weblagu.com&quot;, &quot;.webs-tv.net&quot;, &quot;.webshots.com&quot;, &quot;.websitepulse.com&quot;, &quot;.webworkerdaily.com&quot;, &quot;.weeewooo.net&quot;, &quot;.weekmag.info&quot;, &quot;.wefong.com&quot;, &quot;.weiboleak.com&quot;, &quot;.weijingsheng.org&quot;, &quot;.weiming.info&quot;, &quot;.weiquanwang.org&quot;, &quot;.wengewang.com&quot;, &quot;.wengewang.org&quot;, &quot;.wenhui.ch&quot;, &quot;.wenku.com&quot;, &quot;.wenxuecity.com&quot;, &quot;.wenyunchao.com&quot;, &quot;.westca.com&quot;, &quot;.westernwolves.com&quot;, &quot;.hkg.westkit.net&quot;, &quot;.www.wet123.com&quot;, &quot;.wepn.info&quot;, &quot;.wetpussygames.com&quot;, &quot;.wexiaobo.org&quot;, &quot;.wezhiyong.org&quot;, &quot;.wezone.net&quot;, &quot;.wforum.com&quot;, &quot;.whatblocked.com&quot;, &quot;.whippedass.com&quot;, &quot;.whylover.com&quot;, &quot;.whyx.org&quot;, &quot;.evchk.wikia.com&quot;, &quot;.uncyclopedia.wikia.com&quot;, &quot;.wikileaks.ch&quot;, &quot;.wikileaks.de&quot;, &quot;.wikileaks.eu&quot;, &quot;.wikileaks.lu&quot;, &quot;.wikileaks.org&quot;, &quot;.wikileaks.pl&quot;, &quot;.collateralmurder.com&quot;, &quot;.collateralmurder.org&quot;, &quot;.wikilivres.info&quot;, &quot;.wikimapia.org&quot;, &quot;.secure.wikimedia.org&quot;, &quot;.wikimedia.org.mo&quot;, &quot;.zh.wikinews.org&quot;, &quot;.wikiwiki.jp&quot;, &quot;.sports.williamhill.com&quot;, &quot;.willw.net&quot;, &quot;.windowsphoneme.com&quot;, &quot;.winwhispers.info&quot;, &quot;.wiredbytes.com&quot;, &quot;.wiredpen.com&quot;, &quot;.wisevid.com&quot;, &quot;.witopia.net&quot;, &quot;.wo.tc&quot;, &quot;.woeser.com&quot;, &quot;.wolfax.com&quot;, &quot;.womensrightsofchina.org&quot;, &quot;.woopie.jp&quot;, &quot;.woopie.tv&quot;, &quot;.workatruna.com&quot;, &quot;.worldcat.org&quot;, &quot;.worldjournal.com&quot;, &quot;.wordpress.com&quot;, &quot;.woxinghuiguo.com&quot;, &quot;.wow-life.net&quot;, &quot;.wpoforum.com&quot;, &quot;.wqlhw.com&quot;, &quot;.wqyd.org&quot;, &quot;.wretch.cc&quot;, &quot;.wsj.com&quot;, &quot;.wtfpeople.com&quot;, &quot;.wuala.com&quot;, &quot;.wuerkaixi.com&quot;, &quot;.wufi.org.tw&quot;, &quot;.wujie.net&quot;, &quot;.wujieliulan.com&quot;, &quot;.wukangrui.net&quot;, &quot;.wwitv.com&quot;, &quot;.wzyboy.im&quot;, &quot;.www.x-berry.com&quot;, &quot;.x-art.com&quot;, &quot;.x-wall.org&quot;, &quot;.x1949x.com&quot;, &quot;.x365x.com&quot;, &quot;.xanga.com&quot;, &quot;.xbookcn.com&quot;, &quot;.x.xcity.jp&quot;, &quot;.xcritic.com&quot;, &quot;.destiny.xfiles.to&quot;, &quot;.xfm.pp.ru&quot;, &quot;.xgmyd.com&quot;, &quot;.xh4n.cn&quot;, &quot;.xhamster.com&quot;, &quot;.one.xthost.info&quot;, &quot;.xiaochuncnjp.com&quot;, &quot;.s.xiaod.in&quot;, &quot;.xiaohexie.com&quot;, &quot;.xiaoma.org&quot;, &quot;.xiezhua.com&quot;, &quot;.xing.com&quot;, &quot;.xinmiao.com.hk&quot;, &quot;.xinsheng.net&quot;, &quot;.xinshijue.com&quot;, &quot;.xinhuanet.org&quot;, &quot;.xizang-zhiye.org&quot;, &quot;.xjp.cc&quot;, &quot;.xml-training-guide.com&quot;, &quot;.xmovies.com&quot;, &quot;.xnxx.com&quot;, &quot;.xpdo.net&quot;, &quot;.xpud.org&quot;, &quot;.k2.xrea.com&quot;, &quot;.xtube.com&quot;, &quot;.blog.xuite.net&quot;, &quot;.vlog.xuite.net&quot;, &quot;.xuzhiyong.net&quot;, &quot;.xuchao.org&quot;, &quot;.xuchao.net&quot;, &quot;.xvedios.com&quot;, &quot;.xvideos.com&quot;, &quot;.xxbbx.com&quot;, &quot;.xxxx.com.au&quot;, &quot;.xys.org&quot;, &quot;.xysblogs.org&quot;, &quot;.xyy69.com&quot;, &quot;.xyy69.info&quot;, &quot;.bid.yahoo.com&quot;, &quot;.yahoo.co.jp&quot;, &quot;.yahoo.com.tw&quot;, &quot;.hk.yahoo.com&quot;, &quot;.knowledge.yahoo.com&quot;, &quot;.myblog.yahoo.com&quot;, &quot;.news.yahoo.com&quot;, &quot;.rd.yahoo.com&quot;, &quot;.search.yahoo.com&quot;, &quot;.meme.yahoo.com&quot;, &quot;.tw.yahoo.com&quot;, &quot;.pulse.yahoo.com&quot;, &quot;.upcoming.yahoo.com&quot;, &quot;.video.yahoo.com&quot;, &quot;.yahoo.com.hk&quot;, &quot;.yam.com&quot;, &quot;.yasni.co.uk&quot;, &quot;.yasukuni.or.jp&quot;, &quot;.ydy.com&quot;, &quot;.yeelou.com&quot;, &quot;.yeeyi.com&quot;, &quot;.yegle.net&quot;, &quot;.yfrog.com&quot;, &quot;.yhcw.net&quot;, &quot;.yi.org&quot;, &quot;.yidio.com&quot;, &quot;.yilubbs.com&quot;, &quot;.xa.yimg.com&quot;, &quot;.yipub.com&quot;, &quot;.yogichen.org&quot;, &quot;.yong.hu&quot;, &quot;.yorkbbs.ca&quot;, &quot;.youxu.info&quot;, &quot;.yyii.org&quot;, &quot;.yzzk.com&quot;, &quot;.youjizz.com&quot;, &quot;.youmaker.com&quot;, &quot;.youpai.org&quot;, &quot;.your-freedom.net&quot;, &quot;.yousendit.com&quot;, &quot;.youthbao.com&quot;, &quot;.youthnetradio.org&quot;, &quot;.youthwant.com.tw&quot;, &quot;.youporn.com&quot;, &quot;.youtu.be&quot;, &quot;.youtube.com&quot;, &quot;.youtube-nocookie.com&quot;, &quot;.youtubecn.com&quot;, &quot;.youversion.com&quot;, &quot;.blog.youxu.info&quot;, &quot;.ytimg.com&quot;, &quot;.ytht.net&quot;, &quot;.yuanming.net&quot;, &quot;.yunchao.net&quot;, &quot;.yvesgeleyn.com&quot;, &quot;.yx51.net&quot;, &quot;.yymaya.com&quot;, &quot;.zacebook.com&quot;, &quot;.zannel.com&quot;, &quot;.tap11.com&quot;, &quot;.luntan.zaobao.com&quot;, &quot;.zaobao.com.sg&quot;, &quot;.zaozon.com&quot;, &quot;.zarias.com&quot;, &quot;.zaurus.org.uk&quot;, &quot;.zdnet.com.tw&quot;, &quot;.zengjinyan.org&quot;, &quot;.zeutch.com&quot;, &quot;.www.zfreet.com&quot;, &quot;.zgzcjj.net&quot;, &quot;.zhanbin.net&quot;, &quot;.zhenghui.org&quot;, &quot;.zhenlibu.info&quot;, &quot;.zhinengluyou.com&quot;, &quot;.zhongguotese.net&quot;, &quot;.zhongmeng.org&quot;, &quot;.zhreader.com&quot;, &quot;.zhuichaguoji.org&quot;, &quot;.ziddu.com&quot;, &quot;.zillionk.com&quot;, &quot;.zinio.com&quot;, &quot;.ziplib.com&quot;, &quot;.zkaip.com&quot;, &quot;.zlib.net&quot;, &quot;.zmw.cn&quot;, &quot;.zomobo.net&quot;, &quot;.zonaeuropa.com&quot;, &quot;.zootool.com&quot;, &quot;.zoozle.net&quot;, &quot;.writer.zoho.com&quot;, &quot;.zshare.net&quot;, &quot;.zsrhao.com&quot;, &quot;.zuo.la&quot;, &quot;.zuola.com&quot;, &quot;.zvereff.com&quot;, &quot;.zyzc9.com&quot;, &quot;.upload.wikimedia.org&quot;, &quot;.wikipedia.org&quot;, &quot;.zh-yue.wikipedia.org&quot;, &quot;.en.wikipedia.org&quot;, &quot;.zh.wikipedia.org&quot;, &quot;.m.wikipedia.org&quot;, &quot;.zh.wikisource.org&quot;, &quot;.gov.tw&quot;,
+
+// Place Domains Above.
+		&quot;DOMAIN.PADDING&quot;;
+
+reject = 118.5.49.6, 128.121.126.139, 159.106.121.75, 169.132.13.103, 188.5.4.96, 189.163.17.5, 192.67.198.6, 197.4.4.12, 202.106.1.2, 202.181.7.85, 203.161.230.171, 203.98.7.65, 207.12.88.98, 208.56.31.43, 209.145.54.50, 209.220.30.174, 209.36.73.33, 209.85.229.138, 211.94.66.147, 213.169.251.35, 216.221.188.182, 216.234.179.13, 23.89.5.60, 243.185.187.39, 249.129.46.48, 253.157.14.165, 37.61.54.158, 4.36.66.178, 46.82.174.68, 49.2.123.56, 54.76.135.1, 59.24.3.173, 64.33.88.161, 64.33.99.47, 64.66.163.251, 65.104.202.252, 65.160.219.113, 66.45.252.237, 72.14.205.104, 72.14.205.99, 74.125.127.102, 74.125.155.102, 74.125.39.102, 74.125.39.113, 77.4.7.92, 78.16.49.15, 8.7.198.45, 93.46.8.89;
+
+}
+
+server {
+    label				= &quot;Google&quot;; // Primary
+    timeout				= 3;
+    ip					= 8.8.8.8, 8.8.4.4, 208.67.222.222, 208.67.220.220;
+	proxy_only			= on;
+    caching				= on;
+    randomize_servers	= on;
+}
+
+rr {
+	name=localhost;
+	reverse=on;
+	a=127.0.0.1;
+	owner=localhost;
+	soa=localhost,root.localhost,42,86400,900,86400,86400;
+}
+
+/* vim:set ft=c: */
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这里默认使用北京联通的域名解析服务器，你也可以换成更适合自己的。当遇到被墙域名或者收到了被污染的 IP 时，再使用谷歌和 OpenDNS 的服务器。&lt;/p&gt;
+
+&lt;p&gt;执行 &lt;code&gt;sudo service pdnsd start&lt;/code&gt; 来启动 pdnsd。&lt;/p&gt;
+
+&lt;h2 id=&quot;pdnsd--strongswan&quot;&gt;为使用 pdnsd 配置 Strongswan&lt;/h2&gt;
+
+&lt;p&gt;我们刚才配置的 iptables 中并没有开启 DNS 服务需要的53端口。这个端口如果完全开放的话，VPS 提供商可能会给我们发安全警告。所以我们要利用 Strongswan 的 &lt;code&gt;updown script&lt;/code&gt; 来完成对 iptables 的设置。&lt;/p&gt;
+
+&lt;h3 id=&quot;leftupdown-&quot;&gt;创建 leftupdown 脚本&lt;/h3&gt;
+
+&lt;p&gt;我把这个脚本放在了 &lt;code&gt;~/ipsec_config/leftupdown&lt;/code&gt;，你也可以放在你喜欢的位置。&lt;/p&gt;
+
+&lt;p&gt;文件内容如下。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;#!/bin/sh
+
+PATH=&quot;/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin&quot;
+export PATH
+
+echo &quot;updown executing&quot;
+
+ipsec _updown
+
+case &quot;$PLUTO_VERB:$1&quot; in
+up-client:)
+
+iptables -C INPUT -s $PLUTO_PEER -p tcp -m tcp --dport 53 -j ACCEPT
+exist=$?
+
+if [ $exist -eq 0 ];then
+	echo &quot;updown script rule already exists for $PLUTO_PEER&quot;
+else
+	echo &quot;updown script up client $PLUTO_PEER&quot;
+	iptables -I INPUT 4 -s $PLUTO_PEER -p tcp -m tcp --dport 53 -j ACCEPT
+	iptables -I INPUT 4 -s $PLUTO_PEER -p udp -m udp --dport 53 -j ACCEPT
+	iptables -I INPUT 4 -s $PLUTO_PEER -p tcp -m tcp --sport 53 -j ACCEPT
+	iptables -I INPUT 4 -s $PLUTO_PEER -p udp -m udp --sport 53 -j ACCEPT
+fi
+;;
+
+down-client:)
+
+echo &quot;updown script down client $PLUTO_PEER&quot;
+
+iptables -D INPUT -s $PLUTO_PEER -p tcp -m tcp --dport 53 -j ACCEPT
+iptables -D INPUT -s $PLUTO_PEER -p udp -m udp --dport 53 -j ACCEPT
+iptables -D INPUT -s $PLUTO_PEER -p tcp -m tcp --sport 53 -j ACCEPT
+iptables -D INPUT -s $PLUTO_PEER -p udp -m udp --sport 53 -j ACCEPT
+;;
+
+esac
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;保存好文件后，修改文件权限 &lt;code&gt;chmod 777 ~/ipsec_config/leftupdown&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;etcipsecconf-1&quot;&gt;修改 /etc/ipsec.conf&lt;/h3&gt;
+
+&lt;p&gt;把 &lt;code&gt;rightdns&lt;/code&gt; 改成 VPS 的 IP。在 &lt;code&gt;%default&lt;/code&gt; 里添加一行 &lt;code&gt;leftupdown=/path/to/your/leftupdown&lt;/code&gt;，注意这里把路径换成刚才创建的 &lt;code&gt;leftupdown&lt;/code&gt; 脚本的绝对路径。&lt;/p&gt;
+
+&lt;p&gt;执行 &lt;code&gt;sudo ipsec reload&lt;/code&gt;，然后客户端重新连接一下，试试效果吧。&lt;/p&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>利用Github和Heroku远程发表Hexo文章</title>
+   <link href="http://songchenwen.github.io/tech/2014/08/11/hexo-auto-publisher-on-heroku/"/>
+   <updated>2014-08-11T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/tech/2014/08/11/hexo-auto-publisher-on-heroku</id>
+   <content type="html">&lt;p&gt;使用&lt;a href=&quot;http://hexo.io&quot;&gt;Hexo&lt;/a&gt;这种静态博客程序搭建博客时，始终会遇到一个问题，要写博客就必须有一台环境配置好的电脑才行。想用手机和平板发文章，就会遇到各种问题。&lt;/p&gt;
+
+&lt;p&gt;看到了&lt;a href=&quot;http://kywk.github.io/&quot;&gt;Yu-Zhi Chen&lt;/a&gt;的&lt;a href=&quot;http://kywk.github.io/hexo-migrator-dropbox/&quot;&gt;hexo-migrator-dropbox&lt;/a&gt;，但苦于地域限制，很难发挥它的作用。&lt;/p&gt;
+
+&lt;p&gt;于是开发了&lt;a href=&quot;https://github.com/songchenwen/hexo-migrator-issue&quot;&gt;hexo-migrator-issue&lt;/a&gt;和&lt;a href=&quot;https://github.com/songchenwen/hexo-heroku-auto-publisher&quot;&gt;hexo-heroku-auto-publisher&lt;/a&gt;，顺便为最近要开始的前端项目练练手。这两个插件配合&lt;a href=&quot;http://heroku.com&quot;&gt;Heroku&lt;/a&gt;和Github issues提供的免费服务，即可实现远程发表&lt;a href=&quot;http://hexo.io&quot;&gt;Hexo&lt;/a&gt;文章的功能。&lt;/p&gt;
+
+&lt;p&gt;以下步骤基于已搭建好&lt;a href=&quot;http://hexo.io&quot;&gt;Hexo&lt;/a&gt;环境并且有Github Pages项目的前提。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;准备项目&lt;/h1&gt;
+
+&lt;h2 id=&quot;hexo-heroku-auto-publisher&quot;&gt;安装&lt;a href=&quot;https://github.com/songchenwen/hexo-heroku-auto-publisher&quot;&gt;hexo-heroku-auto-publisher&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;在Hexo项目目录下执行&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ npm install hexo-heroku-auto-publisher --save
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这个插件不需要配置，它的作用就是在你的项目里添加一些上传到&lt;a href=&quot;http://heroku.com&quot;&gt;Heroku&lt;/a&gt;时所需要的文件。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;转换项目&lt;/h2&gt;
+
+&lt;p&gt;安装好&lt;a href=&quot;https://github.com/songchenwen/hexo-heroku-auto-publisher&quot;&gt;hexo-heroku-auto-publisher&lt;/a&gt;后，在&lt;a href=&quot;http://hexo.io&quot;&gt;Hexo&lt;/a&gt;项目目录下执行&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ hexo mp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;等执行完成后你会看到自己的项目里多出了&lt;code&gt;app.js&lt;/code&gt;和&lt;code&gt;Procfile&lt;/code&gt;这两个文件。如果你能看到隐藏文件的话还会看到&lt;code&gt;.ssh&lt;/code&gt;文件夹合理面包含的三个文件。&lt;/p&gt;
+
+&lt;p&gt;让我们看看刚才这个命令的执行过程中都发生了什么：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;下载了&lt;code&gt;app.js&lt;/code&gt;，&lt;code&gt;Procfile&lt;/code&gt;，&lt;code&gt;.ssh/known_hosts&lt;/code&gt;这三个文件&lt;/li&gt;
+  &lt;li&gt;为你生成了一个新的ssh key，用来给&lt;a href=&quot;http://heroku.com&quot;&gt;Heroku&lt;/a&gt;向你的&lt;a href=&quot;https://github.com&quot;&gt;Github&lt;/a&gt;项目提交内容的权限。&lt;/li&gt;
+  &lt;li&gt;为你安装了&lt;a href=&quot;https://github.com/songchenwen/hexo-migrator-issue&quot;&gt;hexo-migrator-issue&lt;/a&gt;插件&lt;/li&gt;
+  &lt;li&gt;为你的项目添加了&lt;code&gt;async&lt;/code&gt;，&lt;code&gt;body-parser&lt;/code&gt;，&lt;code&gt;express&lt;/code&gt;，&lt;code&gt;hexo&lt;/code&gt;这四个依赖。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;ssh-key&quot;&gt;保存ssh key&lt;/h2&gt;
+
+&lt;p&gt;在刚才转换项目的过程中，有一段输出是值得我们注意的。类似下面这样。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Add the following ssh key to https://github.com/settings/ssh 
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAOJXk9uTTwEGw89pET3X7C5ZQSZ76ENNYuamoO+AhMO3xlommwuqFzkKZX7ijWVAhaJ6dfuetpSFVAiSLQsHaEWH/ZLzLD9h+grhrkuk/wUyArn8IXe7hwTKl6fbTzrnZpY8I9FrQOk72cGiq82oLnBpnA1DIHvAQL1c/oIBZpZXWni70N1AOJ5qw4s9H2lqK7p53JLWtx/dEZtBCIvcSCqDrZpVgwQPgzfIdbaD2aB0j6KQKrsQlszj1s/svFzfdv6s1imc6NsA+IxpShH+2c9jbMU2NyEKEnM1ipOyPoFjCHTQ1ufBd5vT8M9nwVoHbpuOhSttBM6HHXWmhPFmp ww@localhost
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这里打印出了我们要添加到&lt;a href=&quot;https://github.com&quot;&gt;Github&lt;/a&gt;上的ssh key，让我们先把它复制出来保存一下吧。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;修改配置文件&lt;/h2&gt;
+
+&lt;p&gt;按照下面的格式修改配置文件&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-yaml&quot;&gt;issue_migrator :
+    repository_name : repository.github.io  
+        # 这个Github项目的issue会被当做文章(必填)
+                                             
+    owner_name : someone                     
+        # 上面那个项目的创建者的用户名 (必填)
+                                             
+    label : blog            
+        # 只有打了这个标签的issue才会被当做文章
+        # 留空这一项的话意为着所有的issue都会被当做文章
+        # 默认空
+                                             
+    issue_count_per_page : 20
+        # 每次API请求中包含多少issue 默认 20
+    
+    clean : true
+        # 这项如果为true的话，每次执行issue_migrator都会先删掉之前所有的文章
+        # 如果为false，则只会添加文章不会删除文章
+        # 只有当你项目里所有之前的文章都转移到issue里之后才应该设为true
+        # 默认 false
+    
+    including_closed : false
+        # 一般我们把issue close了就以为这要把它从博客上删除了
+        # 如果是true，那么close了的issue也不会被认为是删除了的
+        # 默认 false
+        
+heroku_auto_publisher :
+    sender_name : songchenwen
+    	# 当这个Github用户名未这一项的用户
+    	# 对上面的repository产生issue操作时
+    	# 才会触发issue_migrator
+    	# 留空的话就是所有人的操作都会触发
+    	# 默认空
+    	
+    commit_user_name : songchenwen
+    	# 自动发表文章时你希望Github上显示的commit用户名
+    	
+    commit_user_email : emptyzone.0@gmail.com
+    	# 自动发表文章时你希望Github上显示的commit用户email
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;以上这些步骤完成后，我们就已经准备好要部署到&lt;a href=&quot;http://heroku.com&quot;&gt;Heroku&lt;/a&gt;上的项目了。&lt;/p&gt;
+
+&lt;h1 id=&quot;heroku-app&quot;&gt;创建&lt;a href=&quot;http://heroku.com&quot;&gt;Heroku&lt;/a&gt; App&lt;/h1&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;注册&lt;/h2&gt;
+
+&lt;p&gt;如果你还没有Heroku的账户的话，就先去&lt;a href=&quot;https://id.heroku.com/signup&quot;&gt;这里&lt;/a&gt;注册吧。&lt;/p&gt;
+
+&lt;h2 id=&quot;heroku-toolbelt&quot;&gt;安装heroku-toolbelt&lt;/h2&gt;
+
+&lt;p&gt;Heroku toolbelt是你在本地操作Heroku Apps的客户端。
+去&lt;a href=&quot;https://devcenter.heroku.com/articles/quickstart#step-2-install-the-heroku-toolbelt&quot;&gt;这里&lt;/a&gt;下载安装。&lt;/p&gt;
+
+&lt;p&gt;安装完成后打开终端(命令行)执行&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ heroku login
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;然后按照提示输入Email和密码，设置好ssh key。&lt;/p&gt;
+
+&lt;h2 id=&quot;git&quot;&gt;初始化Git&lt;/h2&gt;
+
+&lt;p&gt;如果你当前的项目已经是一个Git版本库了，那么你只需要记得把准备项目时新生成的文件添加的版本控制里就行了。不过需要注意的是./ssh/id_rsa这个文件尽量不要push到公开的版本库上，有了它就有了操作你的&lt;a href=&quot;https://github.com&quot;&gt;Github&lt;/a&gt;项目的授权。&lt;/p&gt;
+
+&lt;p&gt;如果你的项目还没有被初始化成Git版本库过，那么你需要执行下面三条命令。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ git init
+$ git add .
+$ git commit -m &quot;init&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;app&quot;&gt;创建App&lt;/h2&gt;
+
+&lt;p&gt;在项目目录下执行&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ heroku create
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这会在&lt;a href=&quot;http://heroku.com&quot;&gt;Heroku&lt;/a&gt;上创建好对应的App。&lt;/p&gt;
+
+&lt;p&gt;再执行&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ git push heroku master
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这会把你的项目部署到&lt;a href=&quot;http://heroku.com&quot;&gt;Heroku&lt;/a&gt;上。&lt;/p&gt;
+
+&lt;p&gt;执行下面的命令来保证你的项目能得到运行。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ heroku ps:scale web=1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;让我们来访问一下你的项目吧，执行&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;$ heroku open
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;命令执行后会在浏览器里打开你的项目，如果页面上显示success则代表你部署成功了，记住这个页面的网址，我们后面会用到它。&lt;/p&gt;
+
+&lt;h1 id=&quot;github&quot;&gt;配置Github&lt;/h1&gt;
+
+&lt;h2 id=&quot;ssh-key-1&quot;&gt;添加ssh key&lt;/h2&gt;
+
+&lt;p&gt;在&lt;a href=&quot;https://github.com/settings/ssh&quot;&gt;这里&lt;/a&gt;添加上刚才ssh key，注意登录用户必须有提交到Github Pages项目的权限。&lt;/p&gt;
+
+&lt;h2 id=&quot;webhooks&quot;&gt;设置Webhooks&lt;/h2&gt;
+
+&lt;p&gt;打开你用来存放文章(issue)的&lt;a href=&quot;https://github.com&quot;&gt;Github&lt;/a&gt;项目主页，点击右侧的&lt;code&gt;Settings&lt;/code&gt;，再点左侧的&lt;code&gt;Webhooks &amp;amp; Services&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;点击&lt;code&gt;Add webhook&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;在&lt;code&gt;Payload URL&lt;/code&gt;里填入刚才我们打开heroku app的网址。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;Content type&lt;/code&gt;选&lt;code&gt;application/json&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;Secret&lt;/code&gt;留空。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;Which events would you like to trigger this webhook?&lt;/code&gt;选&lt;code&gt;Let me select individual events.&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;在下面的选项里只选&lt;code&gt;Issues&lt;/code&gt;一项就够了。&lt;/p&gt;
+
+&lt;p&gt;选中&lt;code&gt;Active&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;点击&lt;code&gt;Add webhook&lt;/code&gt;。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;现在就去issue里写一篇文章试试吧。记得issue的标题会被当做文件名，issue的内容要带有hexo所需的文件头哦。&lt;/p&gt;
+
+&lt;p&gt;像&lt;a href=&quot;https://github.com/emptyzone/emptyzone.github.com/issues/14&quot;&gt;这个&lt;/a&gt;一样。&lt;/p&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>超越Instagram之路</title>
+   <link href="http://songchenwen.github.io/tech/2013/11/24/way-beyond-instagram-preview-and-outline/"/>
+   <updated>2013-11-24T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/tech/2013/11/24/way-beyond-instagram-preview-and-outline</id>
+   <content type="html">&lt;p&gt;在过去一年多的时间里，我和团队受Instagram的激励一起做了一个图片分享社区。所以同时我也对iOS和Android上的相机开发做了很多研究。我们认为我们产品里的相机在很多方面达到了与Instagram类似的标准，甚至有些方面要更优于它。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;在上周写了一篇关于Android相机启动优化的文章后。我重新考虑了技术文章应有的写法。对于一个较复杂的工程来说，只提取出一小部分主题来写，读者看来就像管中窥豹，恐怕很难获得提升。所以我决定把自己过去一年多里关于iOS和Android平台相机应用的努力，通过一系列的文章，总结记录下来。我会尽量做到循序渐进，也希望能给看到的人带来帮助。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/way-beyond-instagram-preview-and-outline/1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/way-beyond-instagram-preview-and-outline/2.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;上面是在我计划的这一系列文章之后所能实现的工程预览。包括一个拍照界面和一个分享界面。最终结果可能会有差异，但不会差很多。&lt;/p&gt;
+
+&lt;p&gt;这些文章中将会以Android平台相机的开发为主，iOS平台的代码逻辑类似，这样做主要是由于iOS平台有GPUImage这样优秀的开源框架，为我们省掉了很多工作，当然同时也让我们无法更清晰的看到一些细节上我们本该注意到的逻辑。&lt;/p&gt;
+
+&lt;p&gt;随后的文章中将会涉及到的内容包括以下这几点：&lt;/p&gt;
+
+&lt;p&gt;1.开启相机并能实时预览&lt;/p&gt;
+
+&lt;p&gt;2.拍摄照片与保存图片&lt;/p&gt;
+
+&lt;p&gt;3.Android平台不同相机的兼容和配置&lt;/p&gt;
+
+&lt;p&gt;4.相机的对焦功能&lt;/p&gt;
+
+&lt;p&gt;5.相机的闪光灯功能&lt;/p&gt;
+
+&lt;p&gt;6.前后摄像头的切换&lt;/p&gt;
+
+&lt;p&gt;7.从相机界面到分享界面的平滑过渡&lt;/p&gt;
+
+&lt;p&gt;8.利用OpenGl ES实现图片滤镜的原理&lt;/p&gt;
+
+&lt;p&gt;9.利用OpenGl ES实现图片滤镜和实时滤镜&lt;/p&gt;
+
+&lt;p&gt;10.利用OpenGl ES实现可调节的移轴效果&lt;/p&gt;
+
+&lt;p&gt;其中关于图片滤镜的部分可能会用几篇文章来分别介绍。&lt;/p&gt;
+
+&lt;p&gt;另外Instagram的最新版中已经去除了对实时滤镜的支持。他们自己把这描述为有利于用户体验的改进。我倒是觉得这是他们利用iOS SDK中的UIImagePickerController重写相机所带来的副作用，这确实是降低应用内存占用的好办法，但我不认为去掉滤镜的实时预览功能是一种改进，毕竟所见即所得式的拍照能够帮助用户生产更优秀的照片。&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>田亮肯定不是好爸爸</title>
+   <link href="http://songchenwen.github.io/life/2013/11/18/tianliang-bad-dad/"/>
+   <updated>2013-11-18T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/life/2013/11/18/tianliang-bad-dad</id>
+   <content type="html">&lt;p&gt;周五陪女朋友又看了一集《爸爸去哪》。看到田亮鬼鬼祟祟的问别人：“哎，你平时打孩子吗？其实中国式的教育还是有必要的。”我就想起第一集里刚开始这家伙就表达了对于在镜头前不能打孩子的深深遗憾。没想到他之后还在一直叨逼这事。&lt;/p&gt;
+
+&lt;p&gt;人在做了亏心事的时候就总会找各种理由把它合理化，其实就是心虚。他也知道自己做得不对，但如果承认了，不就证明他是个坏爸爸了吗？所以他不能承认。但不说他又憋不住。于是他就一直说，想把黑的说成白的。不知道别的爸爸听他一直叨逼叨的会有什么想法。我是觉得搞体育的人智商真是让人捉急。&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Android相机启动加速</title>
+   <link href="http://songchenwen.github.io/tech/2013/11/17/android-launch-camera-speed-up/"/>
+   <updated>2013-11-17T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/tech/2013/11/17/android-launch-camera-speed-up</id>
+   <content type="html">&lt;p&gt;在Android上实现一个简单能用的相机其实挺容易。谷歌随便搜一搜就有很多能用的Sample。当然就像谷歌能搜到的其他代码一样，这些Sample虽然能用但离好用还很远。&lt;/p&gt;
+
+&lt;p&gt;这篇文章就只说说从用户点击启动按钮到用户能看到实时预览的这一小段时间内，我们所做的优化。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;Android手机上良莠不齐的硬件，导致相机启动时间有长有短，很难预期。用户在使用app过程中，过长的等待会产生焦虑。我们要做的就是让用户尽量感知不到相机启动的耗时。&lt;/p&gt;
+
+&lt;p&gt;按照网上能搜到的一般相机Sample的说法，从启动相机到实时预览，我们需要做三件事：1.构建一个GlSurfaceView并获取它的SurfaceHolder；2.获取一个Camera device，启动它；3.将Camera device的预览设置为我们准备好的SurfaceHolder。&lt;/p&gt;
+
+&lt;p&gt;我们把GlSurfaceView写到xml里如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-markup&quot;&gt;&amp;lt;GlSurfaceView
+	android:id=&quot;@+id/camera_preview&quot;
+	android:layout_width=&quot;match_parent&quot;
+	android:layout_height=&quot;match_parent&quot; /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;我们可以在CameraActivity的onCreate里获取到这个GlSurfaceView。可是并不是GlSurfaceView创建好了SurfaceHolder就也准备好了。我们还需要给它设置一个HolderListener来等待它生成出来的SurfaceHolder。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;	private class SurfaceObserver implements
+			SupportCamSurfaceView.SurfaceHolderLisener {
+
+		public void onSurfaceHolderCreated(SurfaceHolder holder) {
+			mSurfaceHolder = holder;
+		}
+	}
+	vCameraPreview.setHolderListener(new SurfaceObserver());
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;然后我们来Open一个Camera。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;	//代码省略掉了检测Camera个数，获取CameraId还有设置CameraPreviewSize的逻辑。那是其他部分的内容了。
+	mCamera = Camera.open(mCameraId);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;最后把SurfaceHolder设置给Camera就可以开启预览了。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;	mCamera.setPreviewTexture(mSurfaceHolder);
+	mCamera.startPreview();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;一般网上搜到的Sample Code会把这三步放到Activity的onCreate里顺序执行。也就是等SurfaceHolderListener获取到了SurfaceHolder再启动Camera。Camera启动完成再把它俩关联上并启动预览。我们来看一下再小米1上这个流程的耗时。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;获取SurfaceHolderListener    0.3秒
+启动Camera                     1秒
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如果把Activity创建的时间和其它代码执行的时间都忽略的话，我们一共耗费了1.3秒。而用户对大于1秒的等待都是不耐烦的。更不用说在有的手机上Camera启动时间能够达到反人类的1.5秒以上。&lt;/p&gt;
+
+&lt;p&gt;很容易想到的一个优化方案就是让获取SurfaceHolder和启动Camera在两个线程里异步进行。这样应该可以使耗时在小米1上缩短到1秒左右，勉强能接受。&lt;/p&gt;
+
+&lt;p&gt;SurfaceHolder的获取本身就是异步的。我们只需要在Activity的onCreate里再启动一个异步线程去启动Camera。在这两个异步线程执行完成后都分别去检测另一个线程是否完成。简化的代码如下。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;	public void onCreate(Bundle savedInstanceState){
+		super.onCreate(savedInstanceState);
+		vCameraPreview.setHolderListener(new SurfaceObserver());
+		new Handler().post(new Runnable(){
+			public void run(){
+				mCamera = Camera.open(mCameraId);
+				checkCamera();
+			}		
+		});	
+	}
+	
+	private class SurfaceObserver implements
+			SupportCamSurfaceView.SurfaceHolderLisener {
+
+		public void onSurfaceHolderCreated(SurfaceHolder holder) {
+			mSurfaceHolder = holder;
+			checkCamera();
+		}
+	}
+
+	private void checkCamera(){
+		if(mSurfaceHolder != null &amp;amp;&amp;amp; mCamera != null{
+			mCamera.setPreviewTexture(mSurfaceHolder);
+			mCamera.startPreview();
+		}
+	}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这样就算优化完了吗？让我们想想苹果是怎么做的吧。苹果很喜欢用一些过渡动画来掩饰后台加载的耗时。毕竟相机启动的这1秒时间是由硬件限制的，我们在app层面上没办法把它缩短，所以我们不如加一个动画，并在动画过程中提前启动相机，来一个苹果式的小trick。我给进入相机Activity的按钮加了一个0.5秒的反馈动画，又给相机Activity加了一个0.3秒的Pending动画，在两个动画完成后，只需再有0.2秒的时间小米1的相机就完成启动了，这对用户来说已经是完全可以接受的了。&lt;/p&gt;
+
+&lt;p&gt;上面的逻辑实现起来有两个问题。一个是在我们获取到CameraActivity的实例之前就要开始启动相机了，另一个是Camera启动完成后没办法调用Activity实例的checkCamera方法。所以我们只能把Camera和Activity实例分别存放到一个static变量里。写起来不复杂，只是需要注意变量的回收。在Activity的onDestroy里先把Camera release再设为null，Activity实例的引用直接设为null，这样就可以了。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;	static Camera mCamera;	
+	static CameraActivity instance;	
+
+	public void onCreate(Bundle savedInstanceState){
+		super.onCreate(savedInstanceState);
+		instance = this;
+		vCameraPreview.setHolderListener(new SurfaceObserver());
+	}
+
+	public static void openCamera{
+		new Handler().post(new Runnable(){
+			public void run(){
+				mCamera = Camera.open(mCameraId);
+				if(instance != null){
+					instance.checkCamera();
+				}
+			}		
+		});	
+	}
+	
+	private class SurfaceObserver implements
+			SupportCamSurfaceView.SurfaceHolderLisener {
+
+		public void onSurfaceHolderCreated(SurfaceHolder holder) {
+			mSurfaceHolder = holder;
+			checkCamera();
+		}
+	}
+
+	private void checkCamera(){
+		if(mSurfaceHolder != null &amp;amp;&amp;amp; mCamera != null{
+			mCamera.setPreviewTexture(mSurfaceHolder);
+			mCamera.startPreview();
+		}
+	}
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Sparkles Background</title>
+   <link href="http://songchenwen.github.io/tech/2012/09/05/sparkles-background-javascript/"/>
+   <updated>2012-09-05T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/tech/2012/09/05/sparkles-background-javascript</id>
+   <content type="html">&lt;p&gt;&lt;img src=&quot;/images/sparkles-background-javascript/1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h1 id=&quot;js&quot;&gt;背景圆球飘动效果的JS&lt;/h1&gt;
+&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;	var Spark = function () {
+	    var a = this;;
+	    this.n = document.createElement(&quot;div&quot;);
+	    this.caculateStyle().newSpeed().newPoint().
+			display().newPoint().fly()
+	};
+	Spark.prototype.display = function () {
+	    $(this.n).attr(&quot;style&quot;, this.style).
+			css(&quot;position&quot;, &quot;absolute&quot;).css(&quot;z-index&quot;, -1).
+				css(&quot;top&quot;, this.pointY).
+					css(&quot;left&quot;, this.pointX);
+	    $(&#39;#background&#39;).append(this.n);
+	    return this
+	};
+	Spark.prototype.caculateStyle= function(){
+		var size = this.random(18) + 2;
+		var alpha = 0.2 + 0.8 * 2/size;
+		var shadowAlpha = alpha*2;
+		this.style = &quot;border-radius: 50%;&quot;;
+		this.style = this.style	+ &quot;width:&quot; + size + 
+			&quot;px;height:&quot; + size + &quot;px;&quot;;
+		this.style = this.style + &quot;box-shadow:0 0 &quot; + 
+			size+&quot;px rgba(255,255,255,&quot;+ shadowAlpha +&quot;);&quot;;
+		this.style = this.style + &quot;background-color:&quot; + 
+			&quot;rgba(255,255,255,&quot;+ alpha +&quot;);&quot;;
+		return this;
+	}
+	Spark.prototype.fly = function () {
+	    var a = this;
+	    $(this.n).animate({
+	        top: this.pointY,
+	        left: this.pointX
+	    }, this.speed, &quot;linear&quot;, function () {
+	        a.newSpeed().newPoint().fly()
+	    })
+	};
+	Spark.prototype.newSpeed = function () {
+	    this.speed = (this.random(10) + 5) * 1100;
+	    return this
+	};
+	Spark.prototype.newPoint = function () {
+	    this.pointX = this.random(window.innerWidth - 100) + 50;
+	    this.pointY = this.random(window.innerHeight - 100) + 50;
+	    return this
+	};
+	Spark.prototype.random = function (a) {
+	    return Math.ceil(Math.random() * a) - 1
+	};
+	$(function () {
+	    if ($.browser.msie &amp;amp;&amp;amp; $.browser.version &amp;lt; 9) {
+	        return
+	    }
+	    var a = 20;
+	    var b = [];
+	    for (i = 0; i &amp;lt; a; i++) {
+	        b[i] = new Spark()
+	    }
+	});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;a href=&quot;/downloads/code/js/sparkles.js&quot; target=&quot;_blank&quot;&gt;Download&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>金牛座</title>
+   <link href="http://songchenwen.github.io/life/2012/08/30/little-taurus/"/>
+   <updated>2012-08-30T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/life/2012/08/30/little-taurus</id>
+   <content type="html">&lt;p&gt;金牛座的女生都很靠谱，我在夸谁，如果你能看到请一定要对号入座。&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>悲剧才隽永</title>
+   <link href="http://songchenwen.github.io/read/2011/10/12/tragedy-lasts/"/>
+   <updated>2011-10-12T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/read/2011/10/12/tragedy-lasts</id>
+   <content type="html">&lt;p&gt;『我不是故意的，请不要再哭了。我这支铅笔要送给你，我只削过一次哦。我真的不是故意害你跌倒的，对不起啦。』&lt;/p&gt;
+
+&lt;p&gt;「老师早就说过不许在走廊上楼梯口跑，你们不守规矩害我帮老师拿的作业簿掉到一楼，上面有泥土，我对不起爱护作业簿的同学，铅笔还给你，你应该跟全班说对不起。」&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;『是你叫我跟全班说对不起的啊。』&lt;/p&gt;
+
+&lt;p&gt;「我又没有叫你站在讲台上说对不起。」&lt;/p&gt;
+
+&lt;p&gt;『我有在收集邮票，你可不可以写信给我？』&lt;/p&gt;
+
+&lt;p&gt;「我没有写过信诶。你先写给我，我再回信给你。」&lt;/p&gt;
+
+&lt;p&gt;「你不是要写信给我吗？」&lt;/p&gt;
+
+&lt;p&gt;『我只知道你叫陈淑芬，我又不知道你家地址。』&lt;/p&gt;
+
+&lt;p&gt;『诶，瘦皮猴是我的绰号，写信要写我的名字，李政国。』&lt;/p&gt;
+
+&lt;p&gt;「瘦皮猴，我下次会改进的。」&lt;/p&gt;
+
+&lt;p&gt;『谢谢你，爱哭芬。』&lt;/p&gt;
+
+&lt;p&gt;「上课不可以传纸条。上课不可以传纸条。上课不可以传纸条。上课不可以传纸条。。。」&lt;/p&gt;
+
+&lt;p&gt;『上课不可以传纸条。上课不可以传纸条。上课不可以传纸条。上课不可以传纸条。。。』&lt;/p&gt;
+
+&lt;p&gt;『&lt;/p&gt;
+
+&lt;p&gt;淑芬：&lt;/p&gt;
+
+&lt;p&gt;收信快乐。&lt;/p&gt;
+
+&lt;p&gt;今天的天气真好，有一点云，不到二十度的气温，让人期待阳光的温暖。&lt;/p&gt;
+
+&lt;p&gt;已经整整一年没有和你写信了，你好吗？&lt;/p&gt;
+
+&lt;p&gt;去年，我来不及参加你的葬礼，我赶到的时候已经迟了两天，你弟弟把你遗留下来的纸箱交给我，我原封不动的把它带回台北，我一直没有勇气把它打开。&lt;/p&gt;
+
+&lt;p&gt;一直到一个小时之前，我才终于把它打开来，跟我猜的一样。&lt;/p&gt;
+
+&lt;p&gt;里面装的全是我写给你的信，一封一封，你遗留在这个世界上的信。&lt;/p&gt;
+
+&lt;p&gt;我很仔细的把它们又读了一遍，我还看到了那支铅笔，看起来它还是只削过一次的样子。&lt;/p&gt;
+
+&lt;p&gt;爱你。&lt;/p&gt;
+
+&lt;p&gt;』&lt;/p&gt;
+
+&lt;p&gt;「谢谢你。瘦皮猴。」&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>极简主义设计与独立博客</title>
+   <link href="http://songchenwen.github.io/tech/2011/02/19/minimalism-and-blog/"/>
+   <updated>2011-02-19T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/tech/2011/02/19/minimalism-and-blog</id>
+   <content type="html">&lt;p&gt;极简主义是一种生活态度，倡导简约整洁优雅的感官体验。在设计上倾向于以极少的元素辅以大面积留白，从而使内容重点得以强调突出，优雅地传达出设计师的感情。&lt;/p&gt;
+
+&lt;p&gt;Gary Blog的主题便是Gary对极简主义设计的践行，Gary倾心于这种干净而优雅的体验，作为个人博客，Gary Blog实化了Gary理想中面对生活的态度。下面Gary简单阐述一下自己对极简主义设计与个人博客之间联系的理解。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;一、内容为主，设计为辅&lt;/h1&gt;
+&lt;p&gt;Bloggers写博客的目的无疑是为了发出自己的声音并被别人听到，而真正有价值的内容才是吸引读者的关键。&lt;/p&gt;
+
+&lt;p&gt;极简主义设计通过对页面元素数量的最小化，从而加强了博客内容在读者眼中的权重。使读者的注意力集中于内容上，这是在网络阅读中难能可贵的体验。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-1&quot;&gt;二、大面积留白&lt;/h1&gt;
+&lt;p&gt;不同分辨率的显示器一直是网页设计者所纠结的问题，横向滚动条是浏览体验的杀手，但兼容所有分辨率的网页又很难设计。&lt;/p&gt;
+
+&lt;p&gt;而极简主义利用大量的留白解决了这个问题，两侧的留白自动适应了所有不同的分辨率。同样留白的单调也避免了读者的视线做无意义的游移。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-2&quot;&gt;三、慎用色彩&lt;/h1&gt;
+&lt;p&gt;极简主义设计采用极少的颜色展示内容，页面风格统一优雅。仅有的颜色也以冷色调为主。&lt;/p&gt;
+
+&lt;p&gt;暖色调普遍会在人脑中产生警醒的作用，所以暖色调应用于强调，而过多的强调无疑会使读者找不到重点不知所措，甚至给读者带来过大的视觉压力。&lt;/p&gt;
+
+&lt;p&gt;所以黑白与冷色调成了极简主义设计中的主角。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-3&quot;&gt;四、优秀的排版&lt;/h1&gt;
+&lt;p&gt;由于色彩的简化和留白的大量出现，极简主义中对内容的组织只能通过排版来体现。&lt;/p&gt;
+
+&lt;p&gt;对内容的排版应遵从重复、对齐、对比和亲密性原则。&lt;/p&gt;
+
+&lt;p&gt;重复原则即对页面内同类元素采用相同的设计，从而使读者具备直观的相联系的印象。&lt;/p&gt;
+
+&lt;p&gt;对齐原则即对页面元素建立明确的对齐线，使读者的视线移动有所依循，避免居中对齐。&lt;/p&gt;
+
+&lt;p&gt;对比原则即对页面内具有更高优先级的元素采用完全不同的设计，对比原则的基础是重复原则，只有在拥有足够的重复元素的前提下的对比才会产生突出作用，否则只会使页面杂乱。&lt;/p&gt;
+
+&lt;p&gt;亲密性原则即对页面内元素依相关性大小来决定其在空间上的距离，相关元素距离近，无关元素距离远。&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>那是连风都不曾抵达的地方 那是连太阳都无法温暖的角落</title>
+   <link href="http://songchenwen.github.io/read/2011/01/27/beyond-wind-and-light/"/>
+   <updated>2011-01-27T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/read/2011/01/27/beyond-wind-and-light</id>
+   <content type="html">&lt;p&gt;搬来一篇墙外的文章。&lt;/p&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;（一）&lt;/h1&gt;
+&lt;p&gt;不知道各位玩过一个电脑小游戏没有。游戏是这样的，一个场景中，充满着不同方向的引力场和斥力场。游戏者在某个特定点发射一个小球。通过选择特定的发射角度与发射方向，小球就会在屏幕上翻转盘旋，划着奇异的轨道滑向某个终点。&lt;/p&gt;
+
+&lt;p&gt;我想，1963年的Edward.C.Stone一定是玩过这个游戏的。或许这正是他闲暇之余设计的一个小程序。&lt;/p&gt;
+
+&lt;p&gt;那时，他还是芝加哥大学的一个研究生，工作之一是计算某些卫星的发射轨道。在一次计算中，他惊讶地发现，当太阳系行星排列成某些特殊形状的时候，它们的引力就可以不断地为经过它们周边的物体加速。&lt;/p&gt;
+
+&lt;p&gt;进一步的仔细计算表明，这种事情每大约175年才会发生一次，而这种免费午餐式的摇摆变轨加速，能在当时的条件下，用大约十二年时间，就到达原本需要花费三十年时间才能到达的海王星。&lt;/p&gt;
+
+&lt;p&gt;而下一次这种时机的来临，是1977年。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h1 id=&quot;section-1&quot;&gt;（二）&lt;/h1&gt;
+&lt;p&gt;有诗云，一万年太久，只争朝夕。只是科学的归科学，剩下的全归钱。不要说一万年太久，就是一十二年朝夕必争，也没有一个机构肯下这种本钱。卫星上了天，不是说就算完事了，地面控制要钱，地面数据接收要钱，一个不小心卫星出状况了，抢救要钱——说是抢救，其实无非是转着圈儿搜卫星信号而已，宛若大海捞针——闲话少说，总之，啥都要钱，没有人会在一个一飞十二年花钱如流水而且随时都会跟别的男人跑掉的娇宝贝身上下注。&lt;/p&gt;
+
+&lt;p&gt;怎么办？只能把野心藏起来。我们根本没有去海王星的打算，但是，这摇摆变轨加速，可不只缩短去海王星的时间呐。它同样可以让去木星土星的时间，缩短到只需三到四年。&lt;/p&gt;
+
+&lt;p&gt;于是，小心翼翼地，科学家们在六十年代中期，紧跟着一系列成功的水手号卫星之后，提出说，既然我们的水手们如此成功，探测了火星、金星和水星，为什么不也去木星看看呢？就当是这个计划的延续好了。&lt;/p&gt;
+
+&lt;p&gt;NASA答应了，便有了水手计划之木星土星特航，分别叫做水手一十一号，和水手一十二号。&lt;/p&gt;
+
+&lt;p&gt;司马昭之心，路人皆知。哪里有什么水手的延续。很快，琵琶就被扔掉了，而半边夜叉脸也露了出来。这个计划被改名叫做旅行者计划，理直气壮地要一直飞向土星。&lt;/p&gt;
+
+&lt;p&gt;当时，人类还从未近距离拍摄过这两颗行星。在太空竞赛这个大环境的支撑下，计划同样通过了。而在计划的末尾，则约略提到，如果卫星够幸运够强大的话，或许，可以飞到海王星吧。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-2&quot;&gt;（三）&lt;/h1&gt;
+&lt;p&gt;海王星？&lt;/p&gt;
+
+&lt;p&gt;这次，轮到NASA开始琢磨了。海王星？海王星在哪里？海王星到太阳的距离是土星到太阳距离的三倍，木星到太阳距离的六倍，以及地球到太阳距离的三十倍。这几乎已经飞出太阳系了！&lt;/p&gt;
+
+&lt;p&gt;啊！原来，我们还有这种指望啊……&lt;/p&gt;
+
+&lt;p&gt;人永远是不知足的，得到了一，还想得到二，而得到了二，就想得到三——得到了三，他就得到了万物。只是，这次NASA的兴奋与希冀，甚至超出了万物。&lt;/p&gt;
+
+&lt;p&gt;他们想和外星人取得联系。地球。太阳。太阳系。太阳系以外。外星人。&lt;/p&gt;
+
+&lt;p&gt;人生五十年，如梦似幻。七零年代的卡尔·萨根，正处在梦幻年华的黄金时刻。他刚刚在康奈尔大学走上了终生教职的道路，同时担任着NASA的顾问。在这之前，在他的推动之下，1972年发射的先驱者11号和先驱者12号，已经携带上了画者人类男女图象的铝板，向着远方飞去。这次，看上去，又是一个机会啊。&lt;/p&gt;
+
+&lt;p&gt;于是，新的内容被追加进了这个旅行者计划：它将携带更充分的燃料——反正，烧二十年的电池和烧五十年的电池差不多重——然后，再加进一块金盘，录入人类的资料。这东西也不太重，而且，是个软媒介，技术要求不高，开发消耗就更少了。&lt;/p&gt;
+
+&lt;p&gt;看起来，有百利而无一害啊。&lt;/p&gt;
+
+&lt;p&gt;1972年，探测土星木星和它们的卫星，也说不定溜达到天王星海王星，顺带还有很小可能跑出太阳系的旅行者计划，被正式批准了。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-3&quot;&gt;（四）&lt;/h1&gt;
+&lt;p&gt;花开花落，花落花开。转眼间，人类历史上的第一颗卫星已经发射了整整二十二年。而前辈强者，如范阿伦、钱德塞克诸人，也逐渐老去。当年的小伙子Edward Stone，现在已经是加州理工的教授了。旅行者一号和二号于1977年先后离开了地球母亲，三年之后的现在，她们已经双双飞过了木星，并有着诸多的发现，不光观测到了第一座地球之外的活火山，还为木星找到了三个迷途的孩子。在卫星中，她们算得上交际名媛，美名远扬。&lt;/p&gt;
+
+&lt;p&gt;而科学家们，则开始为新的卫星做出准备了。&lt;/p&gt;
+
+&lt;p&gt;“朋友，你想得到我的心么？”“当然。”“那么，请遵守四条原则，多，快，好，省。”&lt;/p&gt;
+
+&lt;p&gt;这大抵是NASA的官员对每一个前来拜访的科学家所说的话。既要让马儿跑，还不准多吃草。、&lt;/p&gt;
+
+&lt;p&gt;那么，只好赚外快，打野食。这次，Edward Stone把他的小算盘，打到了太阳身上。&lt;/p&gt;
+
+&lt;p&gt;什么样的车最省油？&lt;/p&gt;
+
+&lt;p&gt;答案是不开的车。&lt;/p&gt;
+
+&lt;p&gt;在日地体系中，有五个引力平衡点。其中，离地球最近的那个，正好位于地球和太阳的连线上，靠近地球的这边。假如把一颗卫星送到这里，那么，就可以让它连续地观察太阳，而不需做出任何主动运动——在法向上，这是一个稳定平衡，日地引力将把这颗卫星带着绕日转动。它只需在切向上细微地调整自己的位置就好了。&lt;/p&gt;
+
+&lt;p&gt;NASA一定会喜欢这个计划的，Ed想，这些人虽然有钱，但是顿顿都吃能报销的公务餐。你越是抠门，就越对了他们的胃口。现在他要找的，只是一群好哥们。人多声势大，万言书远不如万人签名来得好用。&lt;/p&gt;
+
+&lt;p&gt;于是，在1980年的地球物理年会上，他找到了他的几个旧识与朋友，比如，旅行者计划的第一大脑，希腊人Krimigis；他在加州理工的同事，Dick Mawaldt；还有新近在旅行者计划中崭露头角的研究员George Gloeckler和他在马里兰的同事，Glen Mason。&lt;/p&gt;
+
+&lt;p&gt;大家都有自己的绝活和自己的兴趣。几个人碰头一商量，不若数好合一好，把每个人的仪器凑到一起，组成一颗新卫星，放到这个日地引力平衡点处。&lt;/p&gt;
+
+&lt;p&gt;而这时，远在地球的另一面，George Gloeckler未来最好的朋友，刚刚服完兵役，开始了他在马克思-普朗克实验室的研究员工作。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-4&quot;&gt;（五）&lt;/h1&gt;
+&lt;p&gt;时钟开始迅速地再次向后拨动。这次，我们来到了1990年的Iowa。&lt;/p&gt;
+
+&lt;p&gt;一十二年之前，Eberhard Moebius还是一个小人物，他在波鸿大学拿到了自己的博士学位，然后去服了一年兵役。&lt;/p&gt;
+
+&lt;p&gt;而现在，四十二岁的他，在《自然》杂志上发表了论文，也拥有了属于自己的粒子飞行时间探测仪，已经是业内小有名气的研究者了。他有了自己的研究经费，更有了很多和他密切合作的朋友，其中和他关系最好的一位，是研究太阳风结构的George Gloeckler。&lt;/p&gt;
+
+&lt;p&gt;于是，在邀请之下，他踌躇满志地踏上了美国的土地，来到了世界上空间物理最强的Iowa大学，希望在这里打出属于自己的一片天空。&lt;/p&gt;
+
+&lt;p&gt;但是事情并不令他满意。短短数天时间的互相考察之中，他觉得他并没有看到他想要的，一派欣欣向荣的学术气氛。相反，空气中搀杂着一些说不出的味道来。人与人之间，似乎多了点敷衍，少了些真诚。一边参观著名的范阿伦大楼，他一边与陪同者交流。令他最感到惊讶的是，当他提出说，他可以和其他教工共用以他申请到的经费购买的仪器时，得到的是冷冰冰的答复。&lt;/p&gt;
+
+&lt;p&gt;“不，我们这里不这么干。仪器是属于你自己的，何必要给别人用？”&lt;/p&gt;
+
+&lt;p&gt;尽管如此，他还是在这里交到了一些朋友，比如系主任德怀特·尼克尔森，甚至和他竞争同一个特殊教授职位的克里斯托佛·戈尔茨。&lt;/p&gt;
+
+&lt;p&gt;数月之后，Eberhard同时接到了他的两位好友，George Gloeckler和Martin Lee的邀请，分别来自Maryland和New Hampshire。而Iowa这边，与他联系的人，似乎始终和他有某些隔阂。&lt;/p&gt;
+
+&lt;p&gt;他最终去了New Hampshire。在去New Hampshire之前，他最后造访了Iowa一趟，和尼克尔森与戈尔茨一起吃了顿饭。&lt;/p&gt;
+
+&lt;p&gt;“是啊，大家都只顾自己，从不合作。”尼克尔森感叹道：“但是我也没什么办法。事情变成这个样子，也不是一天两天能够解决的了。”&lt;/p&gt;
+
+&lt;p&gt;“他们是那里我见到的不多的真诚而友好的人。他们是例外。”多年以后，Eberhard这样评价说。&lt;/p&gt;
+
+&lt;p&gt;戈尔茨最终得到了那个职位，他有两个学生，一个叫做卢刚，一个，叫做山林华。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-5&quot;&gt;（六）&lt;/h1&gt;
+&lt;p&gt;1985年，北京大学本科毕业生卢刚，来到了Iowa大学，修读空间物理博士。他选择了克里斯托佛·戈尔茨作为他的导师。他的物理基础很好，选择的课题也是理论性很强的电磁等离子体基础研究。&lt;/p&gt;
+
+&lt;p&gt;1986年，中国科技大学本科毕业生山林华，也来到了美国。他一开始就读的是德克萨斯农机大学。1987年，他转入Iowa大学，并同样选择了戈尔茨作为导师。山林华的研究方向是戈尔茨的另外一个主攻方向，木星的磁场研究。&lt;/p&gt;
+
+&lt;p&gt;经过木星的卫星并不多。在当时，主要的数据来源，仍然是1979年经过那里的两颗旅行者卫星。这同样也成为了山林华的研究的主要依靠。&lt;/p&gt;
+
+&lt;p&gt;山林华和卢刚后来在博士资格考试中，并列获得了第一名。&lt;/p&gt;
+
+&lt;p&gt;1990年，卢刚以第二作者的身份，发表了他的第一篇，也是唯一一篇论文。&lt;/p&gt;
+
+&lt;p&gt;1990年末，山林华博士答辩成功，他利用旅行者卫星研究的木星光环电磁效应的课题，取得了圆满成功，并得到了教授们的一致好评。旅行者的数据是独一无二的，山林华的研究，同样是独一无二的。教授们把这篇论文评为当年的优秀博士论文。&lt;/p&gt;
+
+&lt;p&gt;1990年末1991年初，山林华获得了Iowa大学的一个博士后职位，他仍然在戈尔茨手下工作。&lt;/p&gt;
+
+&lt;p&gt;1991年1月，山林华的第一篇论文发表在《天体物理杂志》上，研究方向同样是木星光环。山林华是第一作者。&lt;/p&gt;
+
+&lt;p&gt;1991年2月和1991年8月，山林华又以第一作者的身份连续发表了两篇文章。这两篇文章则转入了基本等离子体研究，讨论了地球的磁场扰动。&lt;/p&gt;
+
+&lt;p&gt;1991年5月，卢刚试图博士毕业，但是并没有通过初审。他的第二次答辩终于通过了。可惜，他希望留在美国，却并没有找到稳定的工作。&lt;/p&gt;
+
+&lt;p&gt;1991年11月1日，周五，下午3点。卢刚在研讨会进行的过程中，先后开枪射杀了他的导师，戈尔茨，和组中的副教授史密斯，接着他开枪打死了山林华。他离开了组会房间，下到2楼，射杀了系主任尼克尔森。最后他来到行政大楼，打死了副校长克黎利，重伤当时在场的一名本科生学生助理，随后饮弹自尽。&lt;/p&gt;
+
+&lt;p&gt;从此，范阿伦大楼里，多了几分森森鬼气。而Iowa，这个之前高高在上的空间物理研究者们的圣地，也一蹶不振，泯然众人。&lt;/p&gt;
+
+&lt;p&gt;1993年5月，以戈尔茨、山林华和史密斯为第一、第二、第三作者的论文发表在领域内最好的杂志，《地球物理研究》上。这也是山林华为科学作出的最后的贡献。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-6&quot;&gt;（七）&lt;/h1&gt;
+&lt;p&gt;二十年弹指一挥间。曾几何时，岁月爬上了小伙子的头，爬上了姑娘的腰。曾几何时，往日的英姿飒爽，已变得老成持重。六十岁的Edward Stone，已经做过了加州理工数学、物理和空间学院的院长，继而在前任辞世之后，担任起了旅行者计划的主要科学负责人。而两位旅行者，已经远远超过了人们的期待。&lt;/p&gt;
+
+&lt;p&gt;旅行者一号，于1980年掠过土星。在远远地对土卫一进行预观测之后，研究人员决定对她进行改道，让她对土卫一作出详细观测，不再经过天王星与海王星。而旅行者二号，则成为了迄今为止，天王星和海王星的唯一人造访客。&lt;/p&gt;
+
+&lt;p&gt;在卢刚夺去地球上最好的空间物理系的灵魂之前的1989年，旅行者们已经超额完成了她们的行星间观测，并成为了人类太空探索史上划时代的璀璨明珠。&lt;/p&gt;
+
+&lt;p&gt;然则，好事多磨。那颗原本要放在地日引力平衡点的卫星，虽然早在1983年，就在Glen Mason和George Gloeckler的主持下，正式提上日程，却迟迟没有获得批准。&lt;/p&gt;
+
+&lt;p&gt;直到又过了快十五年。&lt;/p&gt;
+
+&lt;p&gt;1997年年底，卫星ACE，在Stone的主持下，射入太空。这是真正属于Stone的第一颗深空探测卫星。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-7&quot;&gt;（八）&lt;/h1&gt;
+&lt;p&gt;那是连风都不曾抵达的地方。&lt;/p&gt;
+
+&lt;p&gt;那是连太阳都无法温暖的角落。&lt;/p&gt;
+
+&lt;p&gt;那是寂寞的远处，太阳系的边缘。&lt;/p&gt;
+
+&lt;p&gt;十多年前，一群人曾经聚在一起讨论过，太阳系统的边界，是在什么地方。&lt;/p&gt;
+
+&lt;p&gt;据说，在很远很远的地方，太阳风会慢到音速以下，因此形成一个边界，叫做终止边界。这个边界再望外走，又走很远很远很远，星际粒子流将最终克服太阳风等离子体，而形成一个弓形冲击波。这个弓形冲击波的里边界，叫做氦球层顶。而这两个边界之间的地方，叫做氦鞘。它们共同构成了太阳系的最外围。&lt;/p&gt;
+
+&lt;p&gt;但是，没有人知道这套理论是否正确。更没有人知道，假如这套理论是正确的话，这两个边界又都在什么地方。&lt;/p&gt;
+
+&lt;p&gt;Just for fun，他们作了一个民意调查，五十多位科学家，每个人把自己的看法写在纸上。&lt;/p&gt;
+
+&lt;p&gt;结果大约是这样的：大部分人认为，终止边界会在地日距离的五十倍左右。小部分人认为可能达到六十倍，还有三四个人认为，可能有八十个日地距离那么远。&lt;/p&gt;
+
+&lt;p&gt;旅行者们孤独前行。&lt;/p&gt;
+
+&lt;p&gt;三年过去了。这些科学家在一起，又作了一次民意调查。这时，旅行者已经离太阳超过五十三倍日地距离了，什么都没有发生。&lt;/p&gt;
+
+&lt;p&gt;这次，大约有三分之一的人，对理论提出了怀疑。另一些人认为，七十到八十倍距离才是合理的。少数人说，或许能到九十倍吧。&lt;/p&gt;
+
+&lt;p&gt;而旅行者们继续孤独前行。&lt;/p&gt;
+
+&lt;p&gt;太阳的温暖越来越难以关照到这两位跋涉的旅人了。她们不得不开始更多地使用自身携带的化学放射电池。即使是这样，能量的供应也在逐渐减少。她们不得不勒紧裤带，节衣缩食。&lt;/p&gt;
+
+&lt;p&gt;1998年，光学成相设备被关掉了。她们失去了一只眼睛。&lt;/p&gt;
+
+&lt;p&gt;紧接着，2000年，旅行者2号的红外探测仪和紫外探测仪也被关掉了，她已经处于全盲的状态——旅行者1号还努力地半睁着她的紫外探测仪，为此，她不得不让她的左臂，太阳风等离子体观测仪停止工作。&lt;/p&gt;
+
+&lt;p&gt;2001年，太阳能电池板所提供的电力已经不足整个卫星供给的十分之一，她们难过地瘸了。&lt;/p&gt;
+
+&lt;p&gt;但是她们仍在跋涉。&lt;/p&gt;
+
+&lt;p&gt;2002年，旅行者2号的高效发射天线停止工作，从此她嘶哑了嗓子，靠着低效频段，以原来千分之一的速度发回数据。&lt;/p&gt;
+
+&lt;p&gt;地面观测人员开始动摇了：她们还能支撑多久？旅行者1号已经离太阳有九十个日地距离了，但是什么都没有看到。终止边界，氦球鞘层，氦球层顶——太空中静悄悄，什么也没有发生。只有日复一日，重复着的相同的数据。&lt;/p&gt;
+
+&lt;p&gt;人们终于决定，是时候放弃这两颗卫星了。她们已经垂垂老矣，或许，不再适合干什么重活了。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-8&quot;&gt;（九）&lt;/h1&gt;
+&lt;p&gt;我们应该感谢什么呢？或许，科学最应该感谢的是官僚主义。官僚主义让科学推迟开始，但是也让科学推迟了结束。&lt;/p&gt;
+
+&lt;p&gt;就在层层审批之中，天际传来了波动。&lt;/p&gt;
+
+&lt;p&gt;2003年11月，旅行者1号进入了终止边界。&lt;/p&gt;
+
+&lt;p&gt;审批停止了。大家张大了嘴。&lt;/p&gt;
+
+&lt;p&gt;这时，旅行者1号距离太阳整整九十四个日地距离。无人能料。&lt;/p&gt;
+
+&lt;p&gt;而在四年之后，2007年7月，旅行者2号在八十七个日地距离处，在另一位置穿越了终止边界。&lt;/p&gt;
+
+&lt;p&gt;盖棺定论。理论是对的，尽管，还需要更多发展。&lt;/p&gt;
+
+&lt;p&gt;而旅行者们的生命，也数得到尽头了。化学放射电池不可能无休止地燃烧下去。顶多到2025年，旅行者上的最后一件科学设备也将停止运转。一切，都将归于平静。&lt;/p&gt;
+
+&lt;p&gt;她们哪里是水性杨花的娇气小姐。她们是身残志坚，不离不弃，天赋异禀，功勋卓著，坚韧不拔，死而后已的奇女子。&lt;/p&gt;
+
+&lt;h1 id=&quot;section-9&quot;&gt;尾声&lt;/h1&gt;
+&lt;p&gt;2007年，ACE的陨落已经提上日程。连续不断的太阳粒子冲击让这位在航空公司、GPS公司和手机公司中信誉颇高的预言家不堪重负。&lt;/p&gt;
+
+&lt;p&gt;2012年，中国的夸父将走上日地引力平衡点，取代ACE的位置，继续它为地球干了一十五年的太阳风暴预测工作。&lt;/p&gt;
+
+&lt;p&gt;2006年，冥王星探测器“新地平线”号从佛罗里达起飞。&lt;/p&gt;
+
+&lt;p&gt;2009年，Eberhard Moebius和他的同僚一起，发起了新一轮的太阳系边界探测计划——自旅行者出发之后，该计划在三十年之内被人反复提出，无一通过。&lt;/p&gt;
+
+&lt;p&gt;这一年，最早提出太阳风模型的Parker 86岁。Gloeckler 76岁，已经几乎无法辨认哪怕是站在对面的人的相貌。Stone 71岁，已经有了两个孙子。Mason 67岁。Moebius 61岁。即使这个卫星计划最终获得通过，他们之中也只有最幸运的那些人，才能看到卫星到达目标的那一刻。&lt;/p&gt;
+
+&lt;p&gt;而人类历史上走得最长的旅行者们，仍在无声地滑向远方，继续着她们寂静的旅程。&lt;/p&gt;
+
+&lt;p&gt;或许，她们会继续她们的幸运，在遥远的时空中的某一点，被某种生物发现，找到自己完美的归属吧……&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>演不完的惨绿青春</title>
+   <link href="http://songchenwen.github.io/life/2011/01/26/angry-teens/"/>
+   <updated>2011-01-26T00:00:00+08:00</updated>
+   <id>http://songchenwen.github.io/life/2011/01/26/angry-teens</id>
+   <content type="html">&lt;p&gt;&lt;img src=&quot;/images/angry-teens/title.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;青春这个字眼总是与惨绿这个形容相伴，就像忧伤和愤怒总是伴随着每一个即将独自面对这个世界的年轻的心。&lt;/p&gt;
+
+&lt;p&gt;在我们的青春即将结束的那几年，仍然怀揣着童稚的理想与信念的我们，眼看着现实社会的无奈，在矛盾重重中我们左冲右突的心灵很难找到自己的位置和可靠的信仰。我们在不断的质问“我究竟还能相信什么？”中，逐渐告别青春，蜕变为麻木的大人。&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;这几天Gary看了两部关于惨绿青春的电视剧。来自台湾的《他们在毕业的前一天爆炸》和来自大陆的《青春期撞上更年期》。其实单从影片名称即可看出孰优孰劣。&lt;/p&gt;
+
+&lt;p&gt;同样是对青春烦恼的描述，台湾的探讨要比大陆深入得多。大陆的青春片总难免沦入搞笑之流，但对问题症结的探讨却总因要照顾各个阶层的感受，而浅尝辄止，不敢深入。但《他们在毕业的前一天爆炸》一片，尽管只有5集却做出了远胜于30多集的讨论，对家庭教育、学校教育、甚至是选举制度等方面对少年的影响都做了揭示。当然，由于大陆根本不存在选举制度，所以也便无需对其多言了。&lt;/p&gt;
+
+&lt;p&gt;在人物塑造方面，《他们在毕业的前一天爆炸》一片也要更胜一筹。大陆影视作品中的人物往往趋于平面化脸谱化。《青春期撞上更年期》中邓家齐的父母几经周折用了30多集的时间也没改掉试图操控孩子命运的心理。而《他们在毕业的前一天爆炸》中每一个人物都在成长，其中尤以王筱柔和洪成辑的戏份最为出彩。&lt;/p&gt;
+
+&lt;p&gt;王筱柔在最无助的时候哭着说“我要掉下去了”“我的身体里好像破了一个洞”，让电脑前的Gary看得胆战心惊。这恐怕是对我们年少时的心灵最形象的描述了。在孤独无依中与社会与自己进行着无止尽的战斗。想要向上，苦苦挣扎，难逃被拉入万丈深渊的命运。&lt;/p&gt;
+
+&lt;p&gt;而洪仔对社会规则的洞悉，同样让人心寒。洪仔心狠手辣做事绝，但是他却并不邪恶。他的狠本质上是压抑的。有压抑就有爆发，寡言少语的洪仔，一旦爆发，便是不回头的冲撞。在他因抢劫银行入狱，浩远去看望他的时候，他淡淡的一句“就是爆炸了啊”却蕴含了多少辛酸多少委屈，还有心中那么多的愤怒。真的是爆炸，积压啊积压，最后就炸了。&lt;/p&gt;
+
+&lt;p&gt;第五集中浩远对阿丁说“帮我记得，我还没有坏掉的样子”。其实浩远并不是坏掉了。他只是不愿与这世界妥协。他用纯真的眼睛看待这个世界，一直试图分辨出黑白对错。于是他和20年前的小四一样，用生命与这个世界进行了一场单挑。当然，就像20年前的小明说的一样，这个世界并不会因为他们改变。&lt;/p&gt;
+
+&lt;p&gt;马上就要告别青春的Gary，其实是不应该再看这些对前途无用甚至有毒副作用的片子了。但这些片子中所蕴含的力量却吸引着Gary。浩远也好，小四也好，他们不妥协不屈服豁出一切都抗争精神是Gary所渴望的。可现实还是现实，Gary还是Gary。就在这即将告别青春的年月，为青春献上最后的祭奠吧。&lt;/p&gt;
+
+&lt;p&gt;下面是《他们在毕业的前一天爆炸》中浩远最喜欢的一首歌，也算是这部剧的点题歌曲。&lt;/p&gt;
+
+&lt;pre&gt;
+Life&#39;s a struggle -宋岳庭
+
+ 
+
+我睁开双眼踏入这个世界
+
+妈妈给我生命现在让我自生自灭
+
+这让我恐惧在我的眼里每个人都戴着面具
+
+回想过去难道生命就是这样延续？
+
+我抽烟抽得我的肺都黑了
+
+就像整个社会被人心笼罩着它也是黑的
+
+我背着宿命的十字架
+
+也渴望power, paper and respect
+
+我想这大概就是human nature
+
+ 
+
+佛家说烦恼即是菩提我暂且不提
+
+我倒是希望能够回到母体
+
+老妈对不起我时常把你气得跺脚
+
+你说你后悔当初没有把我堕掉
+
+每当我放学回家放下那沉重的背包
+
+家里空无一人只残留着你香水的味道
+
+那时我知道你那天晚上又要加班
+
+我打开冰箱拿出微波炉食品当晚餐
+
+老爸在凌晨两点钟醉醺醺地回家
+
+我从睡梦中醒来只听到你们在吵架
+
+我没有办法专心面对第二天的考试
+
+老师他不喜欢我我也不喜欢老师
+
+我讨厌穿制服我讨厌学校的制度
+
+我讨厌训导主任的嘴脸讨厌被束缚
+
+that&#39;s true
+
+ 
+
+很多人不屑我的态度他们说我太cool
+
+警察不爽我都曾将我逮捕
+
+I don&#39;t give a fuck about 人家说什么
+
+他们想说什么就说什么但是他们算什么
+
+没有谁有权利拿他的标准衡量我
+
+主宰是我自己随便人家如何想我还是我
+
+爱钱的女人只给凯子摸
+
+不懂得用保险套的人别嫌孩子多
+
+金钱力量虽大却生不带来死不带走
+
+紧握着双拳的人们何时能松开手？
+
+ 
+
+life&#39;s a struggle 日子还要过
+
+品尝喜怒哀乐之后又是数不尽的troubles
+
+everyday 有多少问题要去面对
+
+有多少夜痛苦烦恼着你无法入睡…
+
+ 
+
+法庭严肃的空气逼得我快不能呼吸
+
+当时面临着终生监禁的我开始反省
+
+铁栏杆之后又是个截然不同的景象
+
+刑犯们眼神中看不到一点和平的气象
+
+仅有一寸短的铅笔写的是监狱风云
+
+日记上描绘的不是美好的户外风景
+
+自由在他们眼里才是憧憬
+
+放一把自制武器在枕头旁以防随时有人偷袭
+
+有些人怀疑老婆在外偷情
+
+有些人把家人寄来的信件一张一张好好收集
+
+有些人二十四小时几乎在床上休息
+
+有些人精神失常因为受不了打击
+
+ 
+
+三个月如火如荼的漫长等待已过去
+
+出狱后的我得面对三年的缓刑期
+
+这也好一生中第一次感觉到幸福
+
+但生命中的考验何止如此我不清楚
+
+我不知道接下来还有什么会发生
+
+翻开报纸的新闻又是看到放火杀人
+
+还记得某年无意间发现的照片
+
+上面有阿姨对男人施行口交的恶心画面
+
+这简直摧毁了她在我心目中的形象
+
+我无法忘怀照片中那笑容多么淫荡
+
+我抵抗胸口存在着不安及惶恐
+
+我不断听到痛苦的声音在内心怒吼
+
+ 
+
+life&#39;s a struggle 日子还要过
+
+品尝喜怒哀乐之后又是数不尽的troubles
+
+everyday 有多少问题要去面对
+
+有多少夜痛苦烦恼着你无法入睡…
+
+ 
+
+不论我走到天南不论我走到地北
+
+不论我走到哪都见识到人心的虚伪
+
+It&#39;s kinda funny 在人的眼里只有money
+
+外表好像要帮你却只是想帮他自己
+
+笑容可掬的脸后面谁知道是个狼心狗肺
+
+连朋友都能背叛因为只有名利合他口味
+
+她说她爱你的时候讲的是问心无愧
+
+搞不好她爱的是你身后的荣华富贵
+
+你可曾困惑在你身旁谁是敌是友
+
+对你落井下石的可能就是你的挚友
+
+你可曾经历当你最需要帮助的时候
+
+平常跟你称兄道弟的人都突然失踪
+
+ 
+
+亲爱的神伟大的神
+
+你可以怪我想法太过无知但我只是人
+
+我不信人因为人也不信我
+
+不要问我为什么我最多只能告诉你这就是我
+
+生命像海浪一样有时高有时低
+
+你是否告诉自己坚强渡过各种时期
+
+我从命运的天台放眼却看不到星空
+
+漆黑的天空压在头顶使我不得轻松
+
+在我心中找不到一个安静的角落
+
+ 
+
+我不能再沈睡下去良心彷佛在笑我
+
+它在说：有几天几夜老妈曾经为你以泪洗面
+
+老爸他只顾己见希望之火只见熄灭
+
+我接起电话是老爸憔悴的声音
+
+虽没见面却不难想像他当时的神情
+
+刚听完他最近失业的消息
+
+脑海里马上浮现祖母的话警告我一定要争气
+
+ 
+
+我已经放弃所有哭的理由
+
+因为我早就习惯冷漠活在无情的现实里头
+
+人生要如何起头？改变要如何起手？
+
+当活在泥沼中要如何才能金盆洗手？
+
+ 
+
+life&#39;s a struggle 日子还要过
+
+品尝喜怒哀乐之后又是数不尽的troubles
+
+everyday 有多少问题要去面对
+
+有多少夜痛苦烦恼着你无法入睡…
+&lt;/pre&gt;
+</content>
+ </entry>
+ 
+
+</feed>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      宋辰文的博客
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/highlight/styles/monokai_sublime.css">
+  <link rel="stylesheet" href="/public/css/lanyon.css">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body class="layout-reverse sidebar-overlay">
+
+    <!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
+     styles, `#sidebar-checkbox` for behavior. -->
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+<!-- Toggleable sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>宋辰文<br />Android & iOS 开发者<br />比太钱包联合创始人</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item active" href="/">Home</a>
+
+    
+
+    
+    
+      
+        
+      
+    
+      
+        
+      
+    
+      
+    
+      
+        
+      
+    
+      
+        
+      
+    
+      
+        
+          <a class="sidebar-nav-item" href="/projects/">Projects</a>
+        
+      
+    
+
+    <a class="sidebar-nav-item" href="/atom.xml" target="_blank">Feed</a>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>
+      &copy; 2015. All rights reserved.
+    </p>
+  </div>
+</div>
+
+
+    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+         content to avoid any CSS collisions with our real content. -->
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h3 class="masthead-title">
+            <a href="/" title="Home">宋辰文</a>
+            <small>的博客</small>
+          </h3>
+        </div>
+      </div>
+
+      <div class="container content">
+        <div class="posts">
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/tech/2014/10/13/cross-fire-wall-on-ios8/">
+        iOS8 不越狱翻墙方案
+      </a>
+    </h1>
+
+    <span class="post-date">13 Oct 2014</span>
+    <blockquote>
+  <p>iOS8为我们带来了第三方输入法和 App Extentions，越狱的需求越来越少。而且自从在 <a href="http://bither.net">Bither</a> 里存了一些比特币之后，我就越来越关注手机系统的安全性。现在真的是能不越狱就尽量不越了。那么不越狱的话怎么满足我自由的访问互联网的需求呢？
+OS X，PC 或者 Android 翻墙，请移步 <a href="http://github.com/clowwindy/shadowsocks">Shadowsocks</a>。</p>
+</blockquote>
+
+<p>我目前在 iPhone 上所用的翻墙方案包含如下两部分 ：</p>
+
+<ul>
+  <li>自动连接并区分墙内外流量的IPsec VPN</li>
+  <li>避开GFW污染，并尽量就近解析域名的DNS</li>
+</ul>
+
+<blockquote>
+  <p>以下步骤需要你有自己的 VPS。
+以下操作基于 Ubuntu，以非 root 用户 ssh 登录。其它发行版应该只有包管理和防火墙部分稍有不同。</p>
+</blockquote>
+
+
+   <div class="or-spacer">
+      <div class="mask"></div>
+    </div>
+  </div>
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/tech/2014/08/11/hexo-auto-publisher-on-heroku/">
+        利用Github和Heroku远程发表Hexo文章
+      </a>
+    </h1>
+
+    <span class="post-date">11 Aug 2014</span>
+    <p>使用<a href="http://hexo.io">Hexo</a>这种静态博客程序搭建博客时，始终会遇到一个问题，要写博客就必须有一台环境配置好的电脑才行。想用手机和平板发文章，就会遇到各种问题。</p>
+
+<p>看到了<a href="http://kywk.github.io/">Yu-Zhi Chen</a>的<a href="http://kywk.github.io/hexo-migrator-dropbox/">hexo-migrator-dropbox</a>，但苦于地域限制，很难发挥它的作用。</p>
+
+<p>于是开发了<a href="https://github.com/songchenwen/hexo-migrator-issue">hexo-migrator-issue</a>和<a href="https://github.com/songchenwen/hexo-heroku-auto-publisher">hexo-heroku-auto-publisher</a>，顺便为最近要开始的前端项目练练手。这两个插件配合<a href="http://heroku.com">Heroku</a>和Github issues提供的免费服务，即可实现远程发表<a href="http://hexo.io">Hexo</a>文章的功能。</p>
+
+<p>以下步骤基于已搭建好<a href="http://hexo.io">Hexo</a>环境并且有Github Pages项目的前提。</p>
+
+
+   <div class="or-spacer">
+      <div class="mask"></div>
+    </div>
+  </div>
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/tech/2013/11/24/way-beyond-instagram-preview-and-outline/">
+        超越Instagram之路
+      </a>
+    </h1>
+
+    <span class="post-date">24 Nov 2013</span>
+    <p>在过去一年多的时间里，我和团队受Instagram的激励一起做了一个图片分享社区。所以同时我也对iOS和Android上的相机开发做了很多研究。我们认为我们产品里的相机在很多方面达到了与Instagram类似的标准，甚至有些方面要更优于它。</p>
+
+
+   <div class="or-spacer">
+      <div class="mask"></div>
+    </div>
+  </div>
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/life/2013/11/18/tianliang-bad-dad/">
+        田亮肯定不是好爸爸
+      </a>
+    </h1>
+
+    <span class="post-date">18 Nov 2013</span>
+    <p>周五陪女朋友又看了一集《爸爸去哪》。看到田亮鬼鬼祟祟的问别人：“哎，你平时打孩子吗？其实中国式的教育还是有必要的。”我就想起第一集里刚开始这家伙就表达了对于在镜头前不能打孩子的深深遗憾。没想到他之后还在一直叨逼这事。</p>
+
+<p>人在做了亏心事的时候就总会找各种理由把它合理化，其实就是心虚。他也知道自己做得不对，但如果承认了，不就证明他是个坏爸爸了吗？所以他不能承认。但不说他又憋不住。于是他就一直说，想把黑的说成白的。不知道别的爸爸听他一直叨逼叨的会有什么想法。我是觉得搞体育的人智商真是让人捉急。</p>
+
+
+   <div class="or-spacer">
+      <div class="mask"></div>
+    </div>
+  </div>
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/tech/2013/11/17/android-launch-camera-speed-up/">
+        Android相机启动加速
+      </a>
+    </h1>
+
+    <span class="post-date">17 Nov 2013</span>
+    <p>在Android上实现一个简单能用的相机其实挺容易。谷歌随便搜一搜就有很多能用的Sample。当然就像谷歌能搜到的其他代码一样，这些Sample虽然能用但离好用还很远。</p>
+
+<p>这篇文章就只说说从用户点击启动按钮到用户能看到实时预览的这一小段时间内，我们所做的优化。</p>
+
+
+   <div class="or-spacer">
+      <div class="mask"></div>
+    </div>
+  </div>
+  
+</div>
+
+<div class="pagination">
+  
+    <span class="pagination-item newer">Newer</span>
+  
+  
+    <a class="pagination-item older" href="/page2">Older</a>
+  
+</div>
+
+
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+    
+    <script>
+  (function(document) {
+    var toggle = document.querySelector('.sidebar-toggle');
+    var sidebar = document.querySelector('#sidebar');
+    var checkbox = document.querySelector('#sidebar-checkbox');
+
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+
+      if(!checkbox.checked ||
+         sidebar.contains(target) ||
+         (target === checkbox || target === toggle)) return;
+
+      checkbox.checked = false;
+    }, false);
+  })(document);
+</script>
+
+<script type="text/javascript" src="/public/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+  </body>
+</html>

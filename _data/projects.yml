@@ -1,0 +1,43 @@
+- name : Bither
+  desc : Bither is a simple and secure Bitcoin wallet.
+  links :
+    - name : Bither Android
+      url : https://github.com/bither/bither-android
+
+    - name : Bither iOS
+      url : https://github.com/bither/bither-ios
+
+    - name : Bitherj
+      desc : Bither JAVA library
+      url : https://github.com/bither/bitherj
+
+    - name : Bitheri
+      desc : Bither Objective-C library
+      url : https://github.com/bither/bitheri
+
+
+- name : FaceTime Audio Enabler
+  desc : Enable FaceTime Audio for iPhones bought in China
+  links : 
+    - name : Github
+      url : https://github.com/emptyzone/FaceTimeAudioEnabler
+
+    - name : Bigboss
+      url : http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=facetimeaudioenablerDp
+
+
+- name : Hexo Heroku Auto Publisher
+  desc : Pull github issues to Hexo as posts automatically on Heroku. This plugin can transform Hexo project to a Heroku app.
+  links : 
+    - name : Related Post
+      url : /tech/2014/08/11/hexo-auto-publisher-on-heroku/
+
+    - name : Github
+      url : https://github.com/songchenwen/hexo-heroku-auto-publisher
+
+
+- name : Hexo Migrator Issue
+  desc : Pull the issues from a public Github repository into Hexo _posts folder as Markdown files.
+  links : 
+    - name : Github
+      url : https://github.com/songchenwen/hexo-migrator-issue

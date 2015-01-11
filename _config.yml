@@ -1,0 +1,24 @@
+# Permalinks
+#
+# Use of `relative_permalinks` ensures post links from the index work properly.
+permalink:           pretty
+relative_permalinks: true
+
+# Setup
+title:               宋辰文
+tagline:             '的博客'
+description:         '宋辰文<br />Android & iOS 开发者<br />比太钱包联合创始人'
+url:                 http://songchenwen.github.io
+baseurl:             /
+paginate:            5
+
+# About/contact
+author:
+  name:              宋辰文
+  url:               https://twitter.com/emptyzone0
+  email:             emptyzone0@gmail.com
+
+# Custom vars
+version:             1.0.0
+
+excerpt_separator:   "<!-- more -->"
