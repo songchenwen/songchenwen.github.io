@@ -53,6 +53,7 @@ cat: /dev/net/tun: File descriptor in bad state
 wget http://download.strongswan.org/strongswan.tar.gz && tar zxvf strongswan* 
 cd strongswan*
 ~~~
+
 ### 安装编译所需的包
 
 ~~~ bash
@@ -61,6 +62,7 @@ sudo apt-get install libgmp3-dev openssl  libssl-dev
 ~~~
 
 ### 编译
+
 Strongswan 在 `configure` 时要对 OpenVZ 特殊处理。
 
 非 OpenVZ 执行如下命令。
