@@ -9,9 +9,9 @@ title: Projects
 
 {% assign projects = site.data.projects %}
 
-<div class="posts" style="margin-top: 0em">
+<div class="posts">
 {% for project in projects %}
-	<div class="post" style="margin-bottom: 2em">
+	<div class="post">
 		<h2> {{ project.name }} </h2>
 		{% if project.desc %}
 			{{ project.desc }}
