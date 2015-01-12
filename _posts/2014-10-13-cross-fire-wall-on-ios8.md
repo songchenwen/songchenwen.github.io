@@ -1,9 +1,7 @@
 ---
 layout: post
 title: iOS8 不越狱翻墙方案
-date: 2014-10-13
-categories: 
-  - Tech
+category: Tech
 tags: 
   - GFW
   - VPN

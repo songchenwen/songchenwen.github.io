@@ -1,7 +1,6 @@
 ---
 layout: post
 title: Android相机启动加速
-date : 2013-11-17
 categories : 
 - Tech
 tags : 

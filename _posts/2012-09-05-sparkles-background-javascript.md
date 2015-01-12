@@ -1,7 +1,6 @@
 ---
 layout: post
 title: Sparkles Background
-date : 2012-9-5
 categories: [Tech]
 tags: [Javascript, 前端]
 

@@ -1,7 +1,6 @@
 ---
 layout : post
 title : 金牛座
-date : 2012-08-30
 categories : [Life]
 tags : [金牛座]
 

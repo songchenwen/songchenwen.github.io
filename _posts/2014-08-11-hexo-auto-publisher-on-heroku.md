@@ -1,7 +1,6 @@
 ---
 layout: post
 title: 利用Github和Heroku远程发表Hexo文章
-date: 2014-8-11
 categories: 
   - Tech
 tags: 

@@ -1,7 +1,6 @@
 ---
 layout: post
 title: 田亮肯定不是好爸爸
-date : 2013-11-18
 categories : [Life]
 tags: [爸爸去哪, 田亮, 家庭暴力]
 

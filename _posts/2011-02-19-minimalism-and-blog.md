@@ -1,7 +1,6 @@
 ---
 layout: post
 title: 极简主义设计与独立博客
-date : 2011-2-19
 categories: [Tech]
 tags: [博客, 极简主义]
 

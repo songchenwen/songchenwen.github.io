@@ -1,7 +1,6 @@
 ---
 layout: post
 title: 那是连风都不曾抵达的地方 那是连太阳都无法温暖的角落
-date : 2011-1-27
 categories : [Read]
 tags : [卫星, 科普]
 

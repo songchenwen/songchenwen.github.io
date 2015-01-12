@@ -1,7 +1,6 @@
 ---
 layout: post
 title: 超越Instagram之路
-date : 2013-11-24
 categories : [Tech]
 tags : [Android, Camera, Instagram]
 ---

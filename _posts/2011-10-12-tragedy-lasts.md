@@ -1,7 +1,6 @@
 ---
 layout: post
 title: 悲剧才隽永
-date : 2011-10-12
 categories : [Read]
 tags : [我可能不会爱你, 电视剧]
 
