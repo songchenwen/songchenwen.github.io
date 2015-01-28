@@ -221,17 +221,20 @@ COMMIT
 在 `/etc/sysctl.conf` 中开启 `net.ipv4.ip_forward=1`
 
 编辑 `/etc/network/if-pre-up.d/firewall`
+
 ~~~ bash
  #!/bin/sh 
 /sbin/iptables-restore < /etc/iptables.firewall.rules
 ~~~
 
 执行
+
 ~~~ bash
 sudo chmod +x /etc/network/if-pre-up.d/firewall
 ~~~
 
 编辑 `/etc/rc.local` 在 `exit 0` 前加上，`20.16.3.18` 换成你的服务器 IP。
+
 ~~~ bash
 iptables -t nat -A POSTROUTING -j MASQUERADE
 iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
