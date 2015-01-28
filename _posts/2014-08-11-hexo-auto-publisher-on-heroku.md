@@ -123,6 +123,7 @@ Heroku toolbelt是你在本地操作Heroku Apps的客户端。
 ~~~ bash
 $ heroku login
 ~~~
+
 然后按照提示输入Email和密码，设置好ssh key。
 
 ##初始化Git
