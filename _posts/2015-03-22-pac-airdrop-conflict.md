@@ -1,7 +1,7 @@
 ---
 layout: post
 published: true
-title: 修改自动代理设置使 AirDrop 可用
+title: 解决21世纪十大难题之一 AirDrop 传输失败
 category: Tech
 ---
 
