@@ -11,13 +11,13 @@ OS X 上的快捷键很多，也很实用，很多操作只靠键盘就能完成
 
 [Hammerspoon](http://www.hammerspoon.org) 就是这样一款可高度定制的窗口管理器。
 
-我以前用的是 [Slate](https://github.com/jigish/slate) 作为窗口管理器的。但是这货已经有两年多没更新过了，看起来是已经被抛弃了。而 Slate 又有一些顽固的 Bug。于是我切换到了 Hammerspoon 上。
+我以前用的是 [Slate](https://github.com/jigish/slate) 作为窗口管理器。但是这货已经有两年多没更新过了，看起来是已经被抛弃了。而且 Slate 又有一些顽固的 Bug。于是我切换到了 Hammerspoon。
 
-Hammerspoon fork 自 [mjolnir](http://mjolnir.io)，但比 mjolnir 更加易用，更向一个成型的产品，需要折腾的东西也比较少。
+Hammerspoon fork 自 [mjolnir](http://mjolnir.io)，但比 mjolnir 更加易用，更像一个成型的产品，需要折腾的东西也更少一些。
 
 <!-- more -->
 
-[下载](https://github.com/Hammerspoon/hammerspoon/releases/latest)好 Hammerspoon 后，把它拖到 `Application` 目录下，运行它，交给它 `Accesibility` 权限。之后就可以开始写自己的配置脚本了。
+[下载](https://github.com/Hammerspoon/hammerspoon/releases/latest)好 Hammerspoon 后，把它拖到 `Application` 目录下，运行它，赋予它 `Accesibility` 权限。之后就可以开始写自己的配置脚本了。
 
 Hammerspoon 的配置脚本基于 Lua，脚本语言其实都相通，这里有一篇 [Learn Lua in Y minutes](http://learnxinyminutes.com/docs/lua/)，大致看一下就能知道怎么写了。
 
@@ -82,7 +82,7 @@ end)
 
 ~~~
 
-这个配置中的 hyper 键，其实是我把 `ctrl` + `alt` + `command` 的修饰键组合映射到了 `caps lock` 上。方法来自[这篇文章](http://stevelosh.com/blog/2012/10/a-modern-space-cadet/)。
+这个配置中的 hyper 键，其实是把 `ctrl` + `alt` + `command` 的修饰键组合映射到了 `caps lock` 上。方法来自[这篇文章](http://stevelosh.com/blog/2012/10/a-modern-space-cadet/)。
 
 Hammerspoon 使用脚本语言来操作 OS X 的系统 API。使很多自动化操作成为可能。
 
