@@ -8,6 +8,10 @@ tags:
   - Hexo
 ---
 
+> 我现在已经不用 Hexo 了。
+
+> 对于自动发布来说，[Travis-CI](https://travis-ci.org) 会是一个更好的选择。
+
 使用[Hexo]这种静态博客程序搭建博客时，始终会遇到一个问题，要写博客就必须有一台环境配置好的电脑才行。想用手机和平板发文章，就会遇到各种问题。
 
 看到了[Yu-Zhi Chen](http://kywk.github.io/)的[hexo-migrator-dropbox](http://kywk.github.io/hexo-migrator-dropbox/)，但苦于地域限制，很难发挥它的作用。
