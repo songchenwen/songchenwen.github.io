@@ -1,0 +1,33 @@
+.donation{
+	border-top: 1px solid #ddd;
+	text-align: center;
+	border-bottom: 1px solid #ddd;
+	padding-bottom: 0.5em;
+}
+
+.donation .line-mark{
+	color: #ddd;
+	line-height: 1em;
+	height: 1em;
+	margin-top: -0.6em;
+	margin-bottom: 0.4em;
+}
+
+.donation .line-mark span{
+	background-color: #fff;
+	padding: 0 0.5em;
+}
+
+.donation img{
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0;
+}
+
+.donation a {
+	color: #666;
+}
+
+#disqus_thread{
+	margin: 4em 0
+}
