@@ -24,11 +24,15 @@ layout: null
    <content type="html">
 
    		{{ post.content | xml_escape }}
-		
-		&lt;br&gt;&lt;br&gt;&lt;br&gt;
-   		&lt;hr/&gt;
-   		&lt;p&gt;Bitcoin Donation: &lt;a href=&quot;bitcoin://1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe&quot;&gt;1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe&lt;/a&gt;&lt;/p&gt;
-   		&lt;p&gt;&lt;img src=&quot;{{ site.baseurl }}public/bitcoin_address.jpg&quot; width=&quot;100px&quot; /&gt;&lt;/p&gt;
+
+         {% capture donation %}
+            <br><br><br>
+            <hr/>
+            <p>Bitcoin Donation: <a href="bitcoin://1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe">1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe</a></p>
+            {% include bitcoin_qr_code.html %}
+         {% endcapture %}
+
+         {{ donation | xml_escape }}
    </content>
  </entry>
  {% endfor %}

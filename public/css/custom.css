@@ -19,10 +19,9 @@
 	padding: 0 0.5em;
 }
 
-.donation img{
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 0;
+.donation .qr{
+    margin: 0.6em auto;
+    display: block;
 }
 
 .donation a {
