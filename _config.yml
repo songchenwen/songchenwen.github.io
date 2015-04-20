@@ -8,7 +8,7 @@ relative_permalinks: true
 title:               宋辰文
 tagline:             '的博客'
 description:         '宋辰文<br />Android & iOS 开发者<br />比太钱包联合创始人'
-url:                 http://songchenwen.github.io
+url:                 https://songchenwen.github.io
 baseurl:             /
 paginate:            5
 
@@ -23,9 +23,11 @@ version:             1.0.0
 
 excerpt_separator:   "<!-- more -->"
 
+enforce_ssl: songchenwen.github.io
+
 prose:
   rooturl: '_posts'
-  siteurl: 'http://songchenwen.github.io/'
+  siteurl: 'https://songchenwen.github.io/'
   relativeLinks: 'http://prose.github.io/starter/links.jsonp'
   media: 'images'
   metadata:
