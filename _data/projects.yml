@@ -20,20 +20,10 @@
   desc : Enable FaceTime Audio for iPhones bought in China
   links : 
     - name : Github
-      url : https://github.com/emptyzone/FaceTimeAudioEnabler
+      url : https://github.com/songchenwen/FaceTimeAudioEnabler
 
     - name : Bigboss
       url : http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=facetimeaudioenablerDp
-
-
-- name : Hexo Heroku Auto Publisher
-  desc : Pull github issues to Hexo as posts automatically on Heroku. This plugin can transform Hexo project to a Heroku app.
-  links : 
-    - name : Related Post
-      url : /tech/2014/08/11/hexo-auto-publisher-on-heroku/
-
-    - name : Github
-      url : https://github.com/songchenwen/hexo-heroku-auto-publisher
 
 
 - name : Hexo Migrator Issue
