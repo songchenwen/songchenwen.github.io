@@ -15,8 +15,14 @@ paginate:            5
 # About/contact
 author:
   name:              宋辰文
-  url:               https://twitter.com/emptyzone0
-  email:             emptyzone0@gmail.com
+  url:               https://twitter.com/songchenwen
+  email:             sanvinsung@gmail.com
+
+gems:
+  - jekyll-mentions
+  - jemoji
+  - jekyll-redirect-from
+  - jekyll-sitemap
 
 # Custom vars
 version:             1.0.0
