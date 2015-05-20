@@ -54,4 +54,8 @@ mpv 的配置文件在 `~/.config/mpv/` 里。`mpv.conf` 是一些基本的配�
 
 使用 mpv 播放一般 H.264 编码的视频时，会使用硬件加速解码，发热和耗电都很低，播放也很流畅，可以说体验很好。但在播放 rmvb 的视频时，只能使用软解，发热和耗电就都升上来了，这应该是所有使用 ffmpeg 做解码器的播放器都遇到的问题。还好现在 rmvb 的视频文件越来越少，偶尔下到了，就先用 ffmpeg 转码成 mp4 再播吧。
 
+~~~ bash
+ffmpeg -i input.rmvb -c:v libx264 -preset veryfast -crf 18 -c:a copy output.mp4
+~~~
+
 mpv 目前还在积极的开发着，[Github](https://github.com/mpv-player/mpv) 上每天都会有几个 Commit。相信随着开发的推进，mpv 会变得越来越全能高效。

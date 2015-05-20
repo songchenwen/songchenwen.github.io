@@ -142,7 +142,7 @@ export LANG=en_US.UTF-8
 
 但 [Maid] 当前的稳定版 0.7.0 并未支持这个功能。
 
-不过 [Maid] 的作者 [Benjamin Oakes](https://github.com/benjaminoakes) 已经让我提交了一个 [Pull Request](https://github.com/benjaminoakes/maid/pull/146)。现在最新的测试版 0.8.0.alpha.1 已经支持这个功能了。
+不过 [Maid] 的作者 [Benjamin Oakes](https://github.com/benjaminoakes) 已经让我提交了一个 [Pull Request](https://github.com/benjaminoakes/maid/pull/146)。现在最新的测试版 0.8.0.alpha.2 已经支持这个功能了。
 
 文件标记功能依赖于 [Tag](https://github.com/jdberry/tag)。需要用户手动安装 `brew install tag`。
 
