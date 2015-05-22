@@ -38,17 +38,37 @@ brew linkapps mpv
 
 ![](/images/mpv-player/1.png)
 
+或者说你就想直接指定所有的视频文件默认都由 mpv 打开的话，你也可以像我一样执行一段 shell 脚本来设置。
+
+~~~ bash
+EXTS=( 3GP ASF AVI FLV M4V MKV MOV MP4 MPEG MPG MPG2 MPG4 RMVB WMV )
+
+brew install duti
+
+for ext in ${EXTS[@]}
+do
+	lower=$(echo $ext | awk '{print tolower($0)}')
+	duti -s io.mpv $ext all
+	duti -s io.mpv $lower all
+done
+~~~
+
 ## 配置
 
 mpv 的配置文件在 `~/.config/mpv/` 里。`mpv.conf` 是一些基本的配置，`input.conf` 是播放过程中一些操作快捷键的设置，`lua-settings/osc.conf`，是播放器控制 UI 自定义设置。
 
 [这里](https://github.com/songchenwen/dotfiles/tree/master/mpv)有我目前在使用的配置文件。
 
-我这里使用的 vo 是 opengl，而不是更高级的 opengl-hq。因为我发现 opengl-hq 的 scale 算法 spline36 在视网膜屏幕上会显著增加耗电量。opengl 和 opengl-hq 播放相同的文件时 CPU 用量大致相等，但 opengl-hq 的耗电量却接近 opengl 的两倍。而相比更高的 scale 精细度来说，我还是偏向于希望能周末一整天都不需要给电脑充电。
+我这里默认使用的 vo 是 opengl，而不是更高级的 opengl-hq。因为我发现 opengl-hq 的 scale 算法 spline36 在视网膜屏幕上会显著增加耗电量。opengl 和 opengl-hq 播放相同的文件时 CPU 用量大致相等，但 opengl-hq 的耗电量却接近 opengl 的两倍。而相比更高的 scale 精细度来说，我还是偏向于希望能周末一整天都不需要给电脑充电。
 
 `input.conf` 里触摸板对播放进度的调节方式我也改成了双指向上或向右划为快进，向下或向左为快退，与 mpv 默认的设置正相反。这是个人习惯的问题了。
 
-另外我的配置文件里还有两个 lua 脚本。`autoload.lua` 会自动将同一文件夹里文件名类似的文件加到播放列表里。`markfinished.lua` 会在一个文件播放到最后几分钟时自动将其标记为已完成 (与 [maid](/tech/2015/04/23/maid-hazel-for-hackers/) 配合)。
+另外我的配置文件里还有四个 lua 脚本。
+
+- `autoload.lua` 会自动将同一文件夹里文件名类似的文件加到播放列表里。
+- `markfinished.lua` 会在一个文件播放到最后几分钟时自动将其标记为已完成 (与 [maid](/tech/2015/04/23/maid-hazel-for-hackers/) 配合)。
+- `vo_battery.lua` 会在应用启动时判断有没有连接电源，有连接电源则开启效果更好也更耗电的 vo。
+- `autosub.lua` 会绑定快捷键 `b` 自动搜索并下载当前播放视频的英文字幕。
 
 ## 使用感受
 
