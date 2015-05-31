@@ -5,11 +5,11 @@ categories: [Tech]
 tags: [Javascript, 前端]
 
 ---
-![](/images/sparkles-background-javascript/1.jpg)
+
+#背景圆球飘动效果的JS
 
 <!-- more -->
 
-#背景圆球飘动效果的JS
 ~~~ javascript
 	var Spark = function () {
 	    var a = this;;

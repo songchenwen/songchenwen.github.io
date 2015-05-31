@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 在 OS X 上发送 PGP 加密邮件
+title: 防篡改防偷窥，OS X 上发送 PGP 加密邮件
 category: Tech
 ---
 
