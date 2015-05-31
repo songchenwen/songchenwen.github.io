@@ -4,7 +4,7 @@ title: 在 OS X 上发送 PGP 加密邮件
 category: Tech
 ---
 
-研究比特币的人一定都听说过 PGP 加密邮件通讯。传说中本聪和小伙伴们发邮件都是要用 PGP 加密的。
+研究比特币的人一定都听说过 PGP 加密邮件通讯。传说中本聪和小伙伴们发邮件都是要用 PGP 加密的。就连这几天热门的 [CZ vs OKCoin](https://www.reddit.com/r/Bitcoin/comments/37tm1b/czs_statement_regarding_the_dispute_between/) 事件里，PGP 也来参与客串了一把。
 
 使用 PGP 加密的邮件通讯，使得邮件接收者可以确信这封邮件是由谁发送的，并且未经篡改，也使得邮件发送者可以确信自己发出的邮件只有对应的接收者一个人能够阅读。
 
