@@ -48,6 +48,8 @@ links:
   - title: Tags
     url: /tags/
 
+markdown: redcarpet
+
 gems:
   - jekyll-mentions
   - jemoji

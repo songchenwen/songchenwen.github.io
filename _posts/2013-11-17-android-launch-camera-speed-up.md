@@ -20,7 +20,7 @@ Android手机上良莠不齐的硬件，导致相机启动时间有长有短，�
 
 我们把GlSurfaceView写到xml里如下：
 
-~~~ markup
+~~~ xml
 <GlSurfaceView
 	android:id="@+id/camera_preview"
 	android:layout_width="match_parent"
