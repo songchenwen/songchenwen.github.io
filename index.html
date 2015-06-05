@@ -119,9 +119,9 @@ tags: [Hossain, Mohd, Faysal, electrical, engineering, blog, university, pennsyl
 	                {% if post.video %}
 	        		{% assign video_embed = post.video | remove:'https://www.youtube.com/watch?v=' %}
                     <p><iframe width="940" height="529" src="//www.youtube.com/embed/{{ video_embed }}?theme=light&amp;color=white" frameborder="0" allowfullscreen> </iframe></p>
-                    <p class="lead">{{ post.content | strip_html | truncatewords:100 }}&hellip;</p>
+                    {{ post.excerpt }}&hellip;
                     {% else %}
-	                <p class="lead">{{ post.excerpt }}&hellip;</p>
+	                {{ post.excerpt }}&hellip;
 	                {% endif %}
 	                <div class="text-center">
 	                    {% if post.description %}
@@ -157,7 +157,7 @@ tags: [Hossain, Mohd, Faysal, electrical, engineering, blog, university, pennsyl
 	                    </div>
 	                </header>
 	                <div class="post-body bordered-bottom">
-	                    <p>{{ post.content | strip_html | truncatewords:100 }}&hellip;</p>
+	                    {{ post.excerpt }}&hellip;
 	                    <div class="text-center">
 	                    {% if post.description %}
 		                <a href="{{ site.url }}{{ post.url }}" data-toggle="tooltip" title="{{ post.description }}" class="more-link btn btn-danger btn-large">
@@ -193,8 +193,7 @@ tags: [Hossain, Mohd, Faysal, electrical, engineering, blog, university, pennsyl
 	                </header>
 	                <div class="post-body bordered-bottom">
 	                {% assign excerptsize = post.excerpt | number_of_words %}
-	                {% if excerptsize <= 100 and excerptsize >= 50 %}<p class = "lead">{{ post.excerpt | strip_html }}&hellip;</p>{% else %}
-	                    <p>{{ post.content | strip_html | truncatewords:100 }}&hellip;</p>{% endif %}
+	                	{{ post.excerpt }}&hellip;
 	                    <div class="text-center">
 	                    {% if post.description %}
 		                <a href="{{ site.url }}{{ post.url }}" data-toggle="tooltip" title="{{ post.description }}" class="more-link btn btn-danger btn-large">
@@ -340,9 +339,9 @@ tags: [Hossain, Mohd, Faysal, electrical, engineering, blog, university, pennsyl
 	                {% if post.video %}
 	        		{% assign video_embed = post.video | remove:'https://www.youtube.com/watch?v=' %}
                     <p><iframe width="940" height="529" src="//www.youtube.com/embed/{{ video_embed }}?theme=light&amp;color=white" frameborder="0" allowfullscreen> </iframe></p>
-                    <p class="lead">{{ post.content | strip_html | truncatewords:100 }}&hellip;</p>
+                    {{ post.excerpt }}&hellip;
                     {% else %}
-	                <p class="lead">{{ post.excerpt }}&hellip;</p>
+	                {{ post.excerpt }}&hellip;
 	                {% endif %}
 	                <div class="text-center">
 	                    {% if post.description %}
@@ -378,7 +377,7 @@ tags: [Hossain, Mohd, Faysal, electrical, engineering, blog, university, pennsyl
 	                    </div>
 	                </header>
 	                <div class="post-body bordered-bottom">
-	                    <p>{{ post.content | strip_html | truncatewords:100 }}&hellip;</p>
+	                    {{ post.excerpt  }}&hellip;
 	                    <div class="text-center">
 	                    {% if post.description %}
 		                <a href="{{ site.url }}{{ post.url }}" data-toggle="tooltip" title="{{ post.description }}" class="more-link btn btn-danger btn-large">
@@ -414,8 +413,7 @@ tags: [Hossain, Mohd, Faysal, electrical, engineering, blog, university, pennsyl
 	                </header>
 	                <div class="post-body bordered-bottom">
 	                {% assign excerptsize = post.excerpt | number_of_words %}
-	                {% if excerptsize <= 100 and excerptsize >= 50 %}<p class = "lead">{{ post.excerpt | strip_html }}&hellip;</p>{% else %}
-	                    <p>{{ post.content | strip_html | truncatewords:100 }}&hellip;</p>{% endif %}
+	                	{{ post.excerpt }}&hellip;
 	                    <div class="text-center">
 	                    {% if post.description %}
 		                <a href="{{ site.url }}{{ post.url }}" data-toggle="tooltip" title="{{ post.description }}" class="more-link btn btn-danger btn-large">
