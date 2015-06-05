@@ -3,6 +3,7 @@ layout: post
 title: 超越Instagram之路
 categories : [Tech]
 tags : [Android, Camera, Instagram]
+imagefeature : way-beyond-instagram-preview-and-outline/1.jpg
 ---
 
 在过去一年多的时间里，我和团队受Instagram的激励一起做了一个图片分享社区。所以同时我也对iOS和Android上的相机开发做了很多研究。我们认为我们产品里的相机在很多方面达到了与Instagram类似的标准，甚至有些方面要更优于它。
@@ -11,9 +12,10 @@ tags : [Android, Camera, Instagram]
 
 在上周写了一篇关于Android相机启动优化的文章后。我重新考虑了技术文章应有的写法。对于一个较复杂的工程来说，只提取出一小部分主题来写，读者看来就像管中窥豹，恐怕很难获得提升。所以我决定把自己过去一年多里关于iOS和Android平台相机应用的努力，通过一系列的文章，总结记录下来。我会尽量做到循序渐进，也希望能给看到的人带来帮助。
 
-![](/images/way-beyond-instagram-preview-and-outline/1.jpg)
-
-![](/images/way-beyond-instagram-preview-and-outline/2.jpg)
+<figure class="half">
+	<a href="/images/way-beyond-instagram-preview-and-outline/1.jpg"><img src="/images/way-beyond-instagram-preview-and-outline/1.jpg"></a>
+	<a href="/images/way-beyond-instagram-preview-and-outline/2.jpg"><img src="/images/way-beyond-instagram-preview-and-outline/2.jpg"></a>
+</figure>
 
 上面是在我计划的这一系列文章之后所能实现的工程预览。包括一个拍照界面和一个分享界面。最终结果可能会有差异，但不会差很多。
 

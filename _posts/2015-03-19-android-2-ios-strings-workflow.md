@@ -3,6 +3,7 @@ layout: post
 published: true
 title: 将安卓的多语言文件转为 iOS 格式的 Workflow
 category: Tech
+tags: [Android, iOS, Afred]
 ---
 
 抽空写了一个将 Android 的 `strings.xml` 文件转为 iOS 的 `Localizable.strings` 格式的小脚本。而且把它封装撑了一个 [Alfred Workflow](https://github.com/songchenwen/Android2iOSStringsWorkflow)。
