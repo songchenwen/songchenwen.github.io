@@ -3,6 +3,7 @@ layout: post
 title: 防篡改防偷窥，OS X 上发送 PGP 加密邮件
 category: Tech
 imagefeature: pgp-mail-on-osx/feature.jpg
+tags : [OSX, PGP]
 ---
 
 研究比特币的人一定都听说过 PGP 加密邮件通讯。传说中本聪和小伙伴们发邮件都是要用 PGP 加密的。就连这几天热门的 [CZ vs OKCoin](https://www.reddit.com/r/Bitcoin/comments/37tm1b/czs_statement_regarding_the_dispute_between/) 事件里，PGP 也来参与客串了一把。
