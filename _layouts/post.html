@@ -50,7 +50,14 @@ Description: Awesome dude, awesome life
                         <iframe width="940" height="529" src="//www.youtube.com/embed/{{ video_embed }}?theme=light&amp;color=white" frameborder="0" allowfullscreen> </iframe>
                         {% endif %}
                         {{ content }}
-                        <br>
+                        <div class="donation">
+                            <p class="text-center small lighter">
+                                <a href="bitcoin://1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe">
+                                <i class="icon-btc"></i> 1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe
+                                </a>
+                            </p>
+                            <p class="text-center">{% include bitcoin_qr_code.html %}</p>
+                        </div>
                     {% assign tagsize = page.tags.size %}
                     {% if tagsize != 0 %}
                     <div class="entry-tags text-center">
