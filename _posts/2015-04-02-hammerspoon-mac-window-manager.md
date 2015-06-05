@@ -3,6 +3,7 @@ layout: post
 published: true
 title: Hammerspoon, OS X 上的全能窗口管理器
 category: Tech
+tags: [OSX, Lua]
 ---
 
 虽然 Mac 的触摸板很方便，但手指尽量少离开键盘区，仍然是提高效率的好方式。

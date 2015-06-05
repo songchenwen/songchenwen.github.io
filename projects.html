@@ -11,21 +11,28 @@ title: Projects
 
 {% assign projects = site.data.projects %}
 
-<div class="posts">
 {% for project in projects %}
-	<div class="post">
-		<h2> {{ project.name }} </h2>
-		{% if project.desc %}
-			{{ project.desc }}
-		{% endif %}
-		{% if project.links %}
-			<ul>
-			{% assign links = project.links%}
-			{% for link in links %}
-					<li><a href="{{ link.url }}">{{ link.name }}</a> <span>{{ link.desc }}</span></li>
-			{% endfor %}
-			</ul>
-		{% endif %}
-	</div>
-{% endfor %}
+<div class="row">
+	 <article class="post col-md-10 col-md-offset-1">
+	 	<header class="post-header">
+			<h2 class="post-title">
+				{{ project.name }} 
+			</h2>
+	 	</header>
+		<div class="post-body">
+			{% if project.desc %}
+				{{ project.desc }}
+			{% endif %}
+			{% if project.links %}
+				<ul>
+				{% assign links = project.links%}
+				{% for link in links %}
+						<li><a href="{{ link.url }}">{{ link.name }}</a> <span>{{ link.desc }}</span></li>
+				{% endfor %}
+				</ul>
+			{% endif %}
+			<hr />
+		</div>
+	</article>
 </div>
+{% endfor %}

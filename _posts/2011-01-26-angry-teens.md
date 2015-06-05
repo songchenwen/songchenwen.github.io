@@ -3,6 +3,7 @@ layout : post
 categories : [Life]
 title : 演不完的惨绿青春
 tags : [电视剧, 青春, 他们在毕业的前一天爆炸]
+imagefeature : angry-teens/title.jpg
 
 ---
 ![](/images/angry-teens/title.jpg)

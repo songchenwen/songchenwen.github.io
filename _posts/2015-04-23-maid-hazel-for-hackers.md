@@ -2,6 +2,7 @@
 layout: post
 title: 比 Hazel 更便宜强大的 Maid 
 category: Tech
+tags: [OSX, Ruby]
 ---
 
 桌面又成乱糟糟一片图标了，下载里也有数不清的文件。每次整理都很让人焦虑。相信以 OS X 为日常操作系统的人都会有这样的感触。当然其实 Windows 或者 Linux 也一样，收集文件并整理是每个人 IT 生活的一部分。

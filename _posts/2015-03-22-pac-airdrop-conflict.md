@@ -3,6 +3,7 @@ layout: post
 published: true
 title: 解决21世纪十大难题之一 AirDrop 传输失败
 category: Tech
+tags: [OSX, AirDrop]
 ---
 
 ![](/images/pac-airdrop-conflict/1.png)

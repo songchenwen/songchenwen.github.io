@@ -3,6 +3,7 @@ layout: post
 published: true
 title: Safari 插件 QQ 旋风离线导出至 Aria2
 category: Tech
+tags: [Safari, Aria2, OSX]
 ---
 
 前两天写了一个 Safari 扩展。可以从QQ旋风离线空间里导出文件到 Aria2 下载。
