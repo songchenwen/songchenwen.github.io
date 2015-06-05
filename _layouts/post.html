@@ -64,7 +64,10 @@ Description: Awesome dude, awesome life
                     <footer class="post-footer entry-meta">
                         {% if site.share %}{% include share.html %}{% endif %}
                         {% include signoff.html %} 
-                        {% if site.disqus_shortname and page.comments == true %}<div id="disqus_thread"></div><!-- /#disqus_thread -->{% endif %}
+                        {% if site.disqus_shortname %}
+                        <script>disqus_identifier = "{{ page.path }}".substring(7); disqus_url = "{{ site.url }}{{ page.url }}";</script>
+                        <div id="disqus_thread"></div><!-- /#disqus_thread -->
+                        {% endif %}
                     </footer>
             </article>
     </div>
