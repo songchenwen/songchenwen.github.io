@@ -1,6 +1,4 @@
 @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,700);
-@import url(https://fonts.googleapis.com/css?family=Merriweather:400,300,400italic,700);
-@import url(https://fonts.googleapis.com/css?family=Raleway:400,300,100,700);
 @import url(https://fonts.googleapis.com/css?family=Sacramento);
 
 /*!
@@ -758,13 +756,13 @@ html {
 /* THEME FONTS */
 /* ----------- */
 body {
-  font-family: 'Merriweather', serif;
+  font-family: Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
 }
 body input,
 body textarea,
 body .btn,
 body button {
-  font-family: 'Merriweather', serif;
+  font-family: Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
 }
 .lighter {
   font-weight: 200 !important;
@@ -781,7 +779,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Raleway', sans-serif;
+  font-family: Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
 }
 h1.lighter,
 h2.lighter,
