@@ -11,11 +11,26 @@ description:         'Android & iOS 开发者<br />比太钱包联合创始人'
 # url:                 https://songchenwen.github.io
 paginate:            5
 
-# About/contact
-author:
+
+owner:
   name:              宋辰文
   url:               https://twitter.com/songchenwen
   email:             sanvinsung@gmail.com
+  description:       'Android & iOS 开发者<br />比太钱包联合创始人'
+  twitter:           songchenwen
+  github:            songchenwen
+  stackexchange:     https://stackexchange.com/users/2545861/songchenwen
+
+disqus_shortname: garyblog
+
+search:           true
+share:            true
+# Read Time is a calculator tp provide post read-time based on word count. Usage is recommended.
+readtime:         true
+# Turn on or off the fin animations in the header and footer
+animated_fins:    true
+# Specify the fin color in RGB value
+fin_color:        "255,255,255"
 
 gems:
   - jekyll-mentions
