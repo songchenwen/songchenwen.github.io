@@ -74,6 +74,7 @@ Description: Awesome dude, awesome life
                         {% if site.disqus_shortname %}
                         <script>disqus_identifier = "{{ page.path }}".substring(7); disqus_url = "{{ site.url }}{{ page.url }}";</script>
                         <div id="disqus_thread"></div><!-- /#disqus_thread -->
+                        {% include disqus_comments.html %}
                         {% endif %}
                     </footer>
             </article>
