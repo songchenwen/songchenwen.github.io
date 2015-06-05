@@ -37,6 +37,17 @@ animated_fins:    true
 # Specify the fin color in RGB value
 fin_color:        "255,255,255"
 
+links: 
+  - title: Home
+    url: /
+    icon: home
+  - title: Projects
+    url: /projects/
+  - title: Categories
+    url: /categories/
+  - title: Tags
+    url: /tags/
+
 gems:
   - jekyll-mentions
   - jemoji
