@@ -75,11 +75,6 @@ defaults:
       layout : post
       category: Tech
       author: songchenwen
-  - scope:
-      path: ""
-      type: "pages"
-    values:
-      layout : page
 
 # Custom vars
 version:             2.0.0
