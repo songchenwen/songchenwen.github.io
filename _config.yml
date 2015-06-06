@@ -21,7 +21,7 @@ owner:
   description:       'Android & iOS 开发者<br />比太钱包联合创始人'
   twitter:           songchenwen
   github:            songchenwen
-  stackexchange:     https://stackexchange.com/users/2545861/songchenwen
+  stackexchange:     https://stackoverflow.com/users/2210682/songchenwen
 
 disqus_shortname: garyblog
 
@@ -49,6 +49,14 @@ links:
     url: /tags/
 
 markdown: redcarpet
+
+redcarpet:
+  extensions:
+    - footnotes
+    - hard_wrap
+    - no_intra_emphasis
+    - autolink
+    - strikethrough
 
 gems:
   - jekyll-mentions
