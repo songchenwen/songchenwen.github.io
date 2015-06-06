@@ -19,9 +19,10 @@ owner:
   avatar:            songchenwen.png
   email:             sanvinsung@gmail.com
   description:       'Android & iOS 开发者<br />比太钱包联合创始人'
+  weibo:             songchenwen
   twitter:           songchenwen
   github:            songchenwen
-  stackexchange:     https://stackoverflow.com/users/2210682/songchenwen
+  stackoverflow:     https://stackoverflow.com/users/2210682/songchenwen
 
 disqus_shortname: garyblog
 

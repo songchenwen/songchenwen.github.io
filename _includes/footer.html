@@ -8,6 +8,11 @@
         <div class="container">
 
             <ul class="social-icons">
+            {% if site.owner.weibo %}<li>
+            <a href="http://weibo.com/{{ site.owner.weibo }}" data-toggle="tooltip" title="{{ site.owner.name}} on Weibo" target="_blank">
+                <i class="icon-weibo"></i>
+            </a>
+            </li>{% endif %}
             {% if site.owner.twitter %}<li>
                 <a href="http://twitter.com/{{ site.owner.twitter }}" data-toggle="tooltip" title="{{ site.owner.name}} on Twitter" target="_blank">
                     <i class="icon-twitter"></i>
@@ -23,8 +28,8 @@
                     <i class="icon-google-plus"></i>
                 </a>
             </li>{% endif %}
-            {% if site.owner.stackexchange %}<li>
-                <a href="{{ site.owner.stackexchange }}" data-toggle="tooltip" title="{{ site.owner.name}} on StackExchange" target="_blank">
+            {% if site.owner.stackoverflow %}<li>
+                <a href="{{ site.owner.stackoverflow }}" data-toggle="tooltip" title="{{ site.owner.name}} on Stack Overflow" target="_blank">
                     <i class="icon-stackexchange"></i>
                 </a>
             </li>{% endif %}
