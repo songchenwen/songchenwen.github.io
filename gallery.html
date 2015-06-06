@@ -1,0 +1,11 @@
+---
+title: Gallery
+imagefeature: gallery/origin/25.jpg
+---
+{% assign count=25 %}
+
+<figure class="third">
+  {% for index in (1..count) %}
+    <a href="/images/gallery/origin/{{ index }}.jpg"><img src="/images/gallery/thumb/{{ index }}.jpg"></a>
+  {% endfor%}
+</figure>
