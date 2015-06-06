@@ -65,6 +65,20 @@ gems:
   - jekyll-redirect-from
   - jekyll-sitemap
 
+defaults:
+  - scope:
+      path: "_posts"
+      type: "posts"
+    values:
+      layout : post
+      category: Tech
+      author: songchenwen
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout : page
+
 # Custom vars
 version:             2.0.0
 
