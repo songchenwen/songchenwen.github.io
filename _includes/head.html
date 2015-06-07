@@ -8,8 +8,19 @@
     window.location = window.location.toString().replace(/^http:/, "https:");
 </script>
 {% endif %}
+{% capture desc %}
+{% if page.description %}
+{{ page.description }}
+{% else %}
+{% if page.excerpt %}
+{{ page.excerpt | strip_html | truncatewords:100 }}
+{% else %}
+{{ site.description }}
+{% endif %}
+{% endif %}
+{% endcapture %}
 
-<meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+<meta name="description" content="{{ desc }}">
 {% if page.tags %}<meta name="keywords" content="{{ page.tags | join: ', ' }}">{% endif %}
 
 {% if site.owner.twitter %}<!-- Twitter Cards -->
@@ -18,14 +29,14 @@
 {% else %}<meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="{% if page.image.thumb %}{{ site.url }}/images/{{ page.image.thumb }}{% else %}{{ site.url }}/images/{{ site.logo }}{% endif %}">{% endif %}
 <meta name="twitter:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
-<meta name="twitter:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+<meta name="twitter:description" content="{{ desc }}">
 <meta name="twitter:creator" content="@{{ site.owner.twitter }}">{% endif %}
 
 <!-- Open Graph -->
 <meta property="og:locale" content="en_US">
 <meta property="og:type" content="article">
 <meta property="og:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
-<meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+<meta property="og:description" content="{{ desc }}">
 <meta property="og:url" content="{{ site.url }}{{ page.url }}">
 <meta property="og:site_name" content="{{ site.title }}">
 {% if page.imagefeature %}<meta property="og:image" content="{{ site.url }}/images/{{ page.imagefeature }}">{% else %}<meta property="og:image" content="{{ site.url }}/images/{{ site.default_bg }}">{% endif %}
