@@ -24,10 +24,10 @@
 {% if page.tags %}<meta name="keywords" content="{{ page.tags | join: ', ' }}">{% endif %}
 
 {% if site.owner.twitter %}<!-- Twitter Cards -->
-{% if page.imagefeature %}<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="{{ site.url }}/images/{{ page.imagefeature }}">
+{% if page.image.thumb %}<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{ site.url }}/images/{{ page.image.thumb }}">
 {% else %}<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="{% if page.image.thumb %}{{ site.url }}/images/{{ page.image.thumb }}{% else %}{{ site.url }}/images/{{ site.logo }}{% endif %}">{% endif %}
+<meta name="twitter:image" content="{% if page.imagefeature %}{{ site.url }}/images/{{ page.imagefeature }}{% else %}{{ site.url }}/images/{{ site.logo }}{% endif %}">{% endif %}
 <meta name="twitter:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
 <meta name="twitter:description" content="{{ desc }}">
 <meta name="twitter:creator" content="@{{ site.owner.twitter }}">{% endif %}
@@ -39,7 +39,7 @@
 <meta property="og:description" content="{{ desc }}">
 <meta property="og:url" content="{{ site.url }}{{ page.url }}">
 <meta property="og:site_name" content="{{ site.title }}">
-{% if page.imagefeature %}<meta property="og:image" content="{{ site.url }}/images/{{ page.imagefeature }}">{% else %}<meta property="og:image" content="{{ site.url }}/images/{{ site.default_bg }}">{% endif %}
+{% if page.image.thumb %}<meta property="og:image" content="{{ site.url }}/images/{{ page.image.thumb }}">{% else %}<meta property="og:image" content="{% if page.imagefeature %}{{ site.url }}/images/{{ page.imagefeature }}{% else %}{{ site.url }}/images/{{ site.logo }}{% endif %}">{% endif %}
 
 {% if site.google_verify %}<meta name="google-site-verification" content="{{ site.google_verify }}">{% endif %}
 {% if site.bing_verify %}<meta name="msvalidate.01" content="{{ site.bing_verify }}">{% endif %}
