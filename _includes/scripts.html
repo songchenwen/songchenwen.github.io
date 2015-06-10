@@ -83,4 +83,18 @@ $("a#click-pages").click(function(){
   })();
 </script>
 {% endif %}
+{% if site.github.environment and site.github.environment != 'development' %}
 <script type="text/javascript" src="{{ site.url }}/assets/js/tencent_stats.js" charset="UTF-8"></script>
+{% else %}
+<!-- No tencent stats in development -->
+{% endif %}
+
+{% if page.custom_script %}
+<script type="text/javascript" src="{{ site.url }}/assets/js/{{ page.custom_script }}.js" charset="UTF-8"></script>
+{% endif %}
+
+{% if page.custom_scripts %}
+{% for s in page.custom_scripts %}
+<script type="text/javascript" src="{{ site.url }}/assets/js/{{ s }}.js" charset="UTF-8"></script>
+{% endfor%}
+{% endif %}

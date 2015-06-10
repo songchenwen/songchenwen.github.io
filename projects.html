@@ -1,8 +1,13 @@
 ---
 title: Projects
 layout : page
+custom_script: github
 ---
-
+<style type="text/css">
+	.repo-info{
+		font-size: 0.6em;
+	}
+</style>
 <p class="message">
 	Projects I build or contribute to.
 </p>
@@ -27,7 +32,22 @@ layout : page
 				<ul>
 				{% assign links = project.links%}
 				{% for link in links %}
-						<li><a href="{{ link.url }}">{{ link.name }}</a> <span>{{ link.desc }}</span></li>
+						<li>
+							<a href="{{ link.url }}">{{ link.name }}</a> 
+							<span>{{ link.desc }}</span>
+							{% if link.repo %}
+								<span class="repo-info" data-repo="{{ link.repo }}" data-username="{{ site.github.owner_name }}">
+									<span class="repo-star" style="display:none">
+										<span class="star"></span>
+										<span>:star:</span>
+									</span>
+									<span class="repo-contribution" style="display:none">
+										<span> | </span>
+										<span class="contribution"></span>
+									</span>
+								</span>
+							{% endif %}
+						</li>
 				{% endfor %}
 				</ul>
 			{% endif %}

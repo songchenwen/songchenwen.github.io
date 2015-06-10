@@ -39,6 +39,8 @@ animated_fins:    true
 # Specify the fin color in RGB value
 fin_color:        "255,255,255"
 
+repository: songchenwen/songchenwen.github.io
+
 links: 
   - title: Home
     url: /
@@ -67,6 +69,7 @@ gems:
   - jemoji
   - jekyll-redirect-from
   - jekyll-sitemap
+  - jekyll-github-metadata
 
 defaults:
   - scope:
