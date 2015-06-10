@@ -19,7 +19,7 @@
       url : https://github.com/bither/bitheri
       repo : bither/bitheri
 
-- name : bither-android-lib
+- name : Bither Android Lib
   desc : Enhance Android JPEG Compression
   links :
     - name : Github
