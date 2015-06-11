@@ -1,6 +1,126 @@
 @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,700);
 @import url(https://fonts.googleapis.com/css?family=Sacramento);
 
+@font-face {
+    font-family: "Source Han Sans SC";
+    font-weight: 700;
+    src: local("SourceHanSansSC-Bold")
+}
+
+@font-face {
+    font-family: "Source Han Sans SC";
+    font-weight: 500;
+    src: local("SourceHanSansSC-Medium")
+}
+
+@font-face {
+    font-family: "Source Han Sans SC";
+    font-weight: 400;
+    src: local("SourceHanSansSC-Normal")
+}
+
+@font-face {
+    font-family: "Source Han Sans SC";
+    font-weight: 300;
+    src: local("SourceHanSansSC-Light")
+}
+
+@font-face {
+    font-family: "Source Han Sans SC";
+    font-weight: 100;
+    src: local("SourceHanSansSC-ExtraLight")
+}
+
+@font-face {
+    font-family: "Noto Sans CJK SC";
+    font-weight: 700;
+    src: local("NotoSansCJKSC-Bold")
+}
+
+@font-face {
+    font-family: "Noto Sans CJK SC";
+    font-weight: 500;
+    src: local("NotoSansCJKSC-Medium")
+}
+
+@font-face {
+    font-family: "Noto Sans CJK SC";
+    font-weight: 400;
+    src: local("NotoSansCJKSC-DemiLight")
+}
+
+@font-face {
+    font-family: "Noto Sans CJK SC";
+    font-weight: 300;
+    src: local("NotoSansCJKSC-Light")
+}
+
+@font-face {
+    font-family: "Noto Sans CJK SC";
+    font-weight: 100;
+    src: local("NotoSansCJKSC-Thin")
+}
+
+@font-face {
+    font-family: ".PingFang SC";
+    font-weight: 700;
+    src: local(".PingFang-SC-Semibold")
+}
+
+@font-face {
+    font-family: ".PingFang SC";
+    font-weight: 500;
+    src: local(".PingFang-SC-Medium")
+}
+
+@font-face {
+    font-family: ".PingFang SC";
+    font-weight: 400;
+    src: local(".PingFang-SC-Regular")
+}
+
+@font-face {
+    font-family: ".PingFang SC";
+    font-weight: 300;
+    src: local(".PingFang-SC-Light")
+}
+
+@font-face {
+    font-family: ".PingFang SC";
+    font-weight: 100;
+    src: local(".PingFang-SC-Thin")
+}
+
+@font-face {
+    font-family: "Microsoft YaHei UI";
+    font-weight: 700;
+    src: local("Microsoft YaHei UI Bold")
+}
+
+@font-face {
+    font-family: "Microsoft YaHei UI";
+    font-weight: 500;
+    src: local("Microsoft YaHei UI Bold")
+}
+
+@font-face {
+    font-family: "Microsoft YaHei UI";
+    font-weight: 400;
+    src: local("Microsoft YaHei UI")
+}
+
+@font-face {
+    font-family: "Microsoft YaHei UI";
+    font-weight: 300;
+    src: local("Microsoft YaHei UI Light")
+}
+
+@font-face {
+    font-family: "Microsoft YaHei UI";
+    font-weight: 100;
+    src: local("Microsoft YaHei UI Light")
+}
+
 /*!
  * HMFAYSAL OMEGA v1.0.1
  * Responsive Jekyll Theme
@@ -15,6 +135,7 @@
 /* - Body typography - */
 body {
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 /* - Headers - */
 h1,
@@ -369,6 +490,7 @@ pre {
 body {
   color: #424143;
 }
+
 h1,
 h2,
 h3,
@@ -756,13 +878,13 @@ html {
 /* THEME FONTS */
 /* ----------- */
 body {
-  font-family: Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
+  font-family: Helvetica, ".PingFang SC", "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei UI", serif;
 }
 body input,
 body textarea,
 body .btn,
 body button {
-  font-family: Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
+  font-family: Helvetica, ".PingFang SC", "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei UI", serif;
 }
 .lighter {
   font-weight: 200 !important;
@@ -779,7 +901,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
+  font-family: Helvetica, ".PingFang SC", "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei UI", Arial, sans-serif;
 }
 h1.lighter,
 h2.lighter,
