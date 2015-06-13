@@ -12,7 +12,6 @@ function loadLanguages(){
       var $repoInfo = $(repoInfo);
       var repo = $repoInfo.data('repo');
       $.get("https://api.github.com/repos/" + repo + "/languages", function(data){
-        gotCount++;
         if(data){
           for(var l in data){
             var $l = $languages.find('#' + l + ' .byte');
@@ -21,6 +20,8 @@ function loadLanguages(){
             }
           }
         }
+      }).always(function(){
+        gotCount++;
         if(gotCount >= $repoInfos.length){
           $languages.find('.loading').hide();
         }
