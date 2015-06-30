@@ -643,6 +643,8 @@ html {
 .post-body {
   padding-bottom: 72px;
   margin-bottom: 72px;
+  text-align: justify; 
+  text-justify: ideographic;
 }
 .post-template .post-body {
   padding-bottom: 36px;
