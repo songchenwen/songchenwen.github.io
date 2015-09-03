@@ -1,13 +1,6 @@
 <meta charset="utf-8">
 <title>{% if page.title %}{{ page.title }} &#8211; {% endif %}{{ site.title }}</title>
 
-{% if site.enforce_ssl %}
-<script type="text/javascript">
-  var enforce = "{{ site.enforce_ssl }}";
-  if ((enforce == window.location.host) && (window.location.protocol != "https:"))
-    window.location = window.location.toString().replace(/^http:/, "https:");
-</script>
-{% endif %}
 {% capture desc %}
 {% if page.description %}
 {{ page.description }}

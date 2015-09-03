@@ -8,7 +8,7 @@ relative_permalinks: true
 title:               宋辰文
 tagline:             '的博客'
 description:         'Android & iOS 开发者<br />比太钱包联合创始人'
-url:                 https://songchenwen.github.io
+url:                 http://songchenwen.com
 logo:                site-logo.png
 default_bg:          default-bg.jpg
 paginate:            5
@@ -17,7 +17,7 @@ paginate:            5
 owner:
   name:              宋辰文
   avatar:            songchenwen.png
-  email:             sanvinsung@gmail.com
+  email:             i@songchenwen.com
   description:       'Android & iOS 开发者<br />比太钱包联合创始人'
   weibo:             songchenwen
   weiboname:         宋辰文
@@ -65,13 +65,6 @@ redcarpet:
     - autolink
     - strikethrough
 
-gems:
-  - jekyll-mentions
-  - jemoji
-  - jekyll-redirect-from
-  - jekyll-sitemap
-  - jekyll-github-metadata
-
 defaults:
   - scope:
       path: "_posts"
@@ -86,11 +79,9 @@ version:             2.0.0
 
 excerpt_separator:   "<!-- more -->"
 
-enforce_ssl: songchenwen.github.io
-
 prose:
   rooturl: '_posts'
-  siteurl: 'https://songchenwen.github.io/'
+  siteurl: 'http://songchenwen.com/'
   relativeLinks: 'http://prose.github.io/starter/links.jsonp'
   media: 'images'
   metadata:
