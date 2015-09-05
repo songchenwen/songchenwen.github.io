@@ -83,7 +83,7 @@ $("a#click-pages").click(function(){
   })();
 </script>
 {% endif %}
-{% if site.tencent_stats %}
+{% if site.url and site.tencent_stats %}
 <script type="text/javascript" src="http://tajs.qq.com/stats?sId={{ site.tencent_stats }}" charset="UTF-8"></script>
 {% endif %}
 
