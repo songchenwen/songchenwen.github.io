@@ -16,12 +16,9 @@ layout: null
   </url>
   {% endfor %}
   {% for page in site.pages %}
-  {% if page.sitemap != null and page.sitemap != empty %}
+  {% if page.layout != nil and page.url != "/404.html" %}
   <url>
     <loc>{{ site.url }}{{ site.baseurl }}{{ page.url }}</loc>
-    <lastmod>{{ page.sitemap.lastmod | date_to_xmlschema }}</lastmod>
-    <changefreq>{{ page.sitemap.changefreq }}</changefreq>
-    <priority>{{ page.sitemap.priority }}</priority>
   </url>
   {% endif %}
   {% endfor %}
