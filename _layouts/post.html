@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN" xml:lang="zh-CN">
 <head>
 {% include head.html %}
 </head>
 <body class="post-template" itemscope itemtype="http://schema.org/WebPage">  
 {% include header.html %}
-<div id="main" class="content" role="main" itemprop="mainContentOfPage" itemscope itemtype="http://schema.org/Blog">
-    <div class="container">
+<div id="main" class="content" role="main" itemprop="mainContentOfPage">
+    <div class="container" itemscope itemtype="http://schema.org/Blog">
         <div class="row">
             <article class="post col-md-8 col-md-offset-2 hentry" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
             {% if site.wpm %}
@@ -65,6 +65,15 @@
                         <div id="disqus_thread"></div><!-- /#disqus_thread -->
                         {% include disqus_comments.html %}
                         {% endif %}
+                        {% if page.image.thumb %}
+                            <meta itemprop="image" content="{{ site.url }}/images/{{ page.image.thumb }}" >
+                        {% else %}
+                            {% if page.imagefeature %}
+                                <meta itemprop="image" content="{{ site.url }}/images/{{ page.imagefeature }}" >
+                            {% else %}
+                                <meta itemprop="image" content="{{ site.url }}/images/{{ site.logo }}" >
+                            {% endif %}
+                        {% endif%}
                     </footer>
             </article>
         </div>
