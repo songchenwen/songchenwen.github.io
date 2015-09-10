@@ -55,7 +55,7 @@
                     <footer class="post-footer entry-meta">
                         {% if site.share %}{% include share.html %}{% endif %}
                         {% include signoff.html %} 
-                        {% if site.disqus_shortname %}
+                        {% if site.disqus_shortname and site.url %}
                         <script>
                             disqus_identifier = "{{ page.path }}".substring(7); 
                             if ("{{ site.url }}".length > 0){
