@@ -30,4 +30,4 @@ tags: [Nodejs, RSS]
 
 [Stop bullshit. Show me the code.](https://github.com/songchenwen/zhuanlan-rss/)
 
-[^1]: [Heroku Free Dyno Sleep and Recharging](https://devcenter.heroku.com/articles/dyno-sleeping)
+[^1]: [Heroku Free Dyno Sleeping and Recharging](https://devcenter.heroku.com/articles/dyno-sleeping)

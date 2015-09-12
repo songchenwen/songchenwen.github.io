@@ -3273,6 +3273,22 @@ img.mfp-img {
 .footnotes ol p {
   margin-bottom: 5px;
 }
+del, s, strike{
+  text-decoration: none;
+  position: relative;
+  display: inline-block;
+}
+del:after, s:after, strike:after {
+  content:"";
+  position: absolute;
+  top: 49%;
+  top: calc(50% - 1px);
+  left: 0;
+  height: 2px;
+  border-radius: 1px;
+  background-color: rgba(184, 15, 61, 0.7);
+  width: 100%;
+}
 
 tt,code,kbd,samp,pre {
     font-family: 'source-code-pro',monospace;
