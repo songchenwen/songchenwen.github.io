@@ -3264,6 +3264,15 @@ img.mfp-img {
     -moz-border-radius: 4px;
     border-radius: 4px;
 }
+.footnotes {
+  margin-bottom: 25px;
+}
+.footnotes ol {
+  font-size: 13px;
+}
+.footnotes ol p {
+  margin-bottom: 5px;
+}
 
 tt,code,kbd,samp,pre {
     font-family: 'source-code-pro',monospace;
