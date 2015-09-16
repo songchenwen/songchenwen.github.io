@@ -28,8 +28,8 @@ layout: null
          {% capture donation %}
             <br><br><br>
             <hr/>
-            <p>Bitcoin Donation: <a href="bitcoin://1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe">1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe</a></p>
-            {% include bitcoin_qr_code.html %}
+            <p>Donation: </p>
+            {% include donation_qr_code_small.html %}
          {% endcapture %}
 
          {{ donation | xml_escape }}

@@ -35,13 +35,11 @@
                         <iframe width="940" height="529" src="//www.youtube.com/embed/{{ video_embed }}?theme=light&amp;color=white" frameborder="0" allowfullscreen> </iframe>
                         {% endif %}
                         {{ content }}
-                        <div class="donation">
+                        <div class="donation bordered-top text-center">
                             <p class="text-center small lighter">
-                                <a href="bitcoin://1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe">
-                                <i class="icon-btc"></i> 1scw1vyiKzyoh37gQSLRNYiwHGsfSGtxe
-                                </a>
+                                <i class="icon-heart"></i> donation
                             </p>
-                            <p class="text-center">{% include bitcoin_qr_code.html %}</p>
+                            <p>{% include donation_qr_code.html %}</p>
                         </div>
                     {% assign tagsize = page.tags.size %}
                     {% if tagsize != 0 %}
