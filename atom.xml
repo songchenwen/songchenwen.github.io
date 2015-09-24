@@ -32,7 +32,14 @@ layout: null
             {% include donation_qr_code_small.html %}
          {% endcapture %}
 
+         {% capture advert %}
+            <br><br><br>
+            <hr/>
+            {% include adverti.html %}
+         {% endcapture %}
+
          {{ donation | xml_escape }}
+         {{ advert | xml_escape }}
    </content>
  </entry>
  {% endfor %}
