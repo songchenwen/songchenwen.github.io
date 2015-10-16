@@ -758,13 +758,13 @@ html {
 /* THEME FONTS */
 /* ----------- */
 body {
-  font-family: Helvetica, ".PingFang SC", "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei UI", serif;
+  font-family: "PingFang SC", Helvetica, "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei UI", serif;
 }
 body input,
 body textarea,
 body .btn,
 body button {
-  font-family: Helvetica, ".PingFang SC", "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei UI", serif;
+  font-family: "PingFang SC", Helvetica, "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei UI", serif;
 }
 .lighter {
   font-weight: 200 !important;
@@ -781,7 +781,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: Helvetica, ".PingFang SC", "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei UI", Arial, sans-serif;
+  font-family: "PingFang SC", Helvetica, "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "Microsoft YaHei UI", Arial, sans-serif;
 }
 h1.lighter,
 h2.lighter,
@@ -3478,7 +3478,8 @@ a#slide:hover{
     }
 
 a#slide:after{
-    content:"F"
+    content:"F";
+    font-family: Arial;
     }
 
 a#slide.slide:after{
