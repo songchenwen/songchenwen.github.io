@@ -25,7 +25,7 @@ FaceTime Audio Enabler 是我大概两年前开发的一款 iOS 越狱插件，�
 
 测试的方法如下:
 
-1. 如果安装过旧版先卸载掉。
+1. 如果安装过旧版先卸载掉，卸载后运行一下以前崩溃的应用，看看是不是正常了。
 2. 在 Cydia 里添加源 http://cydia.myrepospace.com/songchenwen/
 3. 这个源里只有一个 FaceTimeAudioEnabler for iOS9， 装上它。
 4. 进行测试，看看 FaceTime Audio 有没有成功开启。
