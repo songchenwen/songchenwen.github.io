@@ -66,6 +66,7 @@ redcarpet:
     - no_intra_emphasis
     - autolink
     - strikethrough
+    - tables
 
 defaults:
   - scope:

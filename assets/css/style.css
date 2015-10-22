@@ -3670,6 +3670,28 @@ body.slide{
 img.emoji {
   margin:0px;
 }
+.post-body ol {
+  margin-bottom: 30px;
+}
+.post-body table {
+  width: 100%;
+  border-color: #e0e0e0;
+  border-width: 1px 0 0 1px;
+  border-style: solid;
+  margin-bottom: 30px;
+}
+.post-body table th {
+  padding:5px;
+  border-color: #e0e0e0;
+  border-width: 0 1px 1px 0;
+  border-style: solid;
+}
+.post-body table td {
+  padding:5px;
+  border-color: #e0e0e0;
+  border-width: 0 1px 1px 0;
+  border-style: solid;
+}
 .advert {
   margin:20px 0 0 0;
   padding-top: 20px;
@@ -3683,4 +3705,13 @@ img.emoji {
 }
 .donation img {
   margin: 0 10px;
+  width: 120px;
+  height: 120px;
+}
+@media screen and (max-width:470px){
+  .donation img{
+    width: 80px;
+    height: 80px;
+    margin: 0 4px;
+  }
 }
