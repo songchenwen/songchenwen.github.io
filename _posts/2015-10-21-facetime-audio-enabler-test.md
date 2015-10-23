@@ -7,6 +7,11 @@ image:
   thumb: facetime-audio-enabler-test/1.jpg
 ---
 
+> 测试已结束，已上线 BigBoss，测试源已移除。
+
+> 相关阅读: 
+> ・[国内越狱没有社区, 只有庸众](/life/2015/10/22/jailbreak-in-china/)
+
 长话短说。
 
 FaceTime Audio Enabler 是我大概两年前开发的一款 iOS 越狱插件，用来打开国行 iPhone 的 FaceTime Audio 功能。
@@ -31,16 +36,6 @@ FaceTime Audio Enabler 是我大概两年前开发的一款 iOS 越狱插件，�
 4. 进行测试，看看 FaceTime Audio 有没有成功开启。
 5. 试试以前崩溃的应用，比如 QQ国际版，Reeder 2 之类的，看还崩溃吗。
 6. 把测试结果连同设备型号和 iOS 版本一起评论到这篇文章下面。
-
-
-当前测试进度:
-
-CPU   |  系统  | FaceTime Audio   |  32 位 App
-:------:|:-------:|:-------------:|:---------:
-64bit |  iOS 9 |   成功启用  |  不崩溃
-64bit |  iOS 8 |   成功启用  |   不崩溃
-32bit |  iOS 9 |   待测     |   不崩溃
-32bit |  iOS 8 |   待测     |   待测 
 
 待测试的差不多了的时候，我会把它再提交到 BigBoss 上的。
 
