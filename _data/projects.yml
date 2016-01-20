@@ -22,7 +22,7 @@
 - name : Bither Android Lib
   desc : Enhance Android JPEG Compression
   links :
-    - name : Github
+    - name : GitHub
       url : https://github.com/bither/bither-android-lib
       repo : bither/bither-android-lib
 
@@ -36,16 +36,25 @@
 - name : FaceTime Audio Enabler
   desc : Enable FaceTime Audio for iPhones bought in China
   links : 
-    - name : Github
+    - name : GitHub
       url : https://github.com/songchenwen/FaceTimeAudioEnabler
       repo : songchenwen/FaceTimeAudioEnabler
 
     - name : Bigboss
       url : http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=facetimeaudioenablerDp
 
+- name : Zhuanlan RSS
+  desc : 知乎专栏 RSS 
+  links :
+    - name : GitHub
+      url : https://github.com/songchenwen/zhuanlan-rss
+      repo : songchenwen/zhuanlan-rss
+    - name : Visit
+      url : http://zhuanlan-rss.songchenwen.com
+
 - name : Hexo Migrator Issue
   desc : Pull the issues from a public Github repository into Hexo _posts folder as Markdown files.
   links : 
-    - name : Github
+    - name : GitHub
       url : https://github.com/songchenwen/hexo-migrator-issue
       repo : songchenwen/hexo-migrator-issue
