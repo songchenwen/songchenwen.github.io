@@ -29,7 +29,7 @@ OS X 上用 [Homebrew](http://brew.sh) 安装 mpv 是最方便的了。
 
 ~~~ bash
 brew tap mpv-player/mpv
-brew install mpv
+brew install mpv --with-bundle
 brew linkapps mpv
 ~~~
 
@@ -42,7 +42,7 @@ brew linkapps mpv
 或者说你就想直接指定所有的视频文件默认都由 mpv 打开的话，你也可以像我一样执行一段 shell 脚本来设置。
 
 ~~~ bash
-EXTS=( 3GP ASF AVI FLV M4V MKV MOV MP4 MPEG MPG MPG2 MPG4 RMVB WMV )
+EXTS=( 3GP ASF AVI FLV M4V MKV MOV MP4 MPEG MPG MPG2 MPG4 RMVB WMV MTS )
 
 brew install duti
 
@@ -69,6 +69,7 @@ mpv 的配置文件在 `~/.config/mpv/` 里。`mpv.conf` 是一些基本的配�
 - `autoload.lua` 会自动将同一文件夹里文件名类似的文件加到播放列表里。
 - `markfinished.lua` 会在一个文件播放到最后几分钟时自动将其标记为已完成 (与 [maid](/tech/2015/04/23/maid-hazel-for-hackers/) 配合)。
 - `vo_battery.lua` 会在应用启动时判断有没有连接电源，有连接电源则开启效果更好也更耗电的 vo。
+- `ontop_fullscreen.lua` 会在全屏播放时自动将窗口置顶，这样可以避免鼠标移到最下面时出现 Dock 栏。
 - `autosub.lua` 会绑定快捷键 `b` 自动搜索并下载当前播放视频的英文字幕。
 
 ## 使用感受
