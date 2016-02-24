@@ -28,7 +28,6 @@ mpv 以 ffmpeg 为解码器，可以调用 OS X 平台的硬件加速解码，�
 OS X 上用 [Homebrew](http://brew.sh) 安装 mpv 是最方便的了。
 
 ~~~ bash
-brew tap mpv-player/mpv
 brew install mpv --with-bundle
 brew linkapps mpv
 ~~~
