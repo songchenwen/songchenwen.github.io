@@ -4,7 +4,7 @@ permalink:           pretty
 title:               宋辰文
 tagline:             '的博客'
 description:         'Android & iOS 开发者<br />比太钱包联合创始人'
-url:                 http://songchenwen.com
+url:                 https://songchenwen.com
 logo:                site-logo.png
 default_bg:          default-bg.jpg
 paginate:            5
@@ -52,17 +52,6 @@ links:
     url: /tags/
   - title: Gallery
     url: /gallery/
-
-markdown: redcarpet
-
-redcarpet:
-  extensions:
-    - footnotes
-    - hard_wrap
-    - no_intra_emphasis
-    - autolink
-    - strikethrough
-    - tables
 
 defaults:
   - scope:
