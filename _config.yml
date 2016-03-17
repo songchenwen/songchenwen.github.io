@@ -59,7 +59,6 @@ defaults:
       type: "posts"
     values:
       layout : post
-      category: Tech
       author: songchenwen
 
 # Custom vars
