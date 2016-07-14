@@ -32,7 +32,7 @@ brew install mpv --with-bundle
 brew linkapps mpv
 ~~~
 
-这样会在 Homebrew 会自动在 `/Applications` 下创建一个到 `mpv.app` 的软链。
+这样 Homebrew 会自动在 `/Applications` 下创建一个到 `mpv.app` 的软链。
 
 要默认使用 mpv 播放某一类型的视频文件的话，只需要在 Finder 里选中一个视频文件，`command + i`，再打开方式处选中 `mpv.app`，并点击全部更改，就可以了。
 
