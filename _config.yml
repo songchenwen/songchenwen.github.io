@@ -52,6 +52,7 @@ links:
     url: /tags/
   - title: Gallery
     url: https://photo.lib.songchenwen.com:6443/
+    external: true
 
 defaults:
   - scope:
