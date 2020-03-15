@@ -3,7 +3,7 @@ permalink:           pretty
 # Setup
 title:               宋辰文
 tagline:             '的博客'
-description:         'Android & iOS 开发者<br />比太钱包联合创始人'
+description:         '技术，时事，潜水，滑雪'
 url:                 https://songchenwen.com
 logo:                site-logo.png
 default_bg:          default-bg.jpg
@@ -50,9 +50,6 @@ links:
     url: /categories/
   - title: Tags
     url: /tags/
-  - title: Gallery
-    url: https://photo.lib.songchenwen.com:6443/
-    external: true
 
 defaults:
   - scope:
