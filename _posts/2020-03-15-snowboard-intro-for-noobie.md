@@ -34,8 +34,8 @@ imagefeature: snowboard-intro-for-noobie/feature.jpg
 
 对于一步一步学习单板来说，推荐只参考以下两个信息源：
 
->> 1. [严冰的央视单板教学](https://www.bilibili.com/video/av3567790)。由于是上个世纪90年代的影片了，画面过于古老，但一步一步的教学方式很好，我就是主要依据此视频来自学的。另外B站上边貌似有两集顺序错了，弹幕里有说，大家看的时候注意吧。
->> 2. [滑雪老司機-SnowSensei](https://www.youtube.com/channel/UCKVZHwuuDxFk-KfT7g5_ZYA), [B站](https://space.bilibili.com/486442591)。SnowSensei 是原台湾国手，现在野雪塾的合伙人，教学细致生动。19-20雪季刚开始的时候 SnowSensei 的教学视频还不是很多，但这个雪季 SnowSensei 录了不少教学，稍加整理应该就可以出一套完整的入门教程了。我在下面具体练习的说明中会告诉大家可以参考 SnowSensei 的哪部教学来练习。
+> 1. [严冰的央视单板教学](https://www.bilibili.com/video/av3567790)。由于是上个世纪90年代的影片了，画面过于古老，但一步一步的教学方式很好，我就是主要依据此视频来自学的。另外B站上边貌似有两集顺序错了，弹幕里有说，大家看的时候注意吧。
+> 2. [滑雪老司機-SnowSensei](https://www.youtube.com/channel/UCKVZHwuuDxFk-KfT7g5_ZYA), [B站](https://space.bilibili.com/486442591)。SnowSensei 是原台湾国手，现在野雪塾的合伙人，教学细致生动。19-20雪季刚开始的时候 SnowSensei 的教学视频还不是很多，但这个雪季 SnowSensei 录了不少教学，稍加整理应该就可以出一套完整的入门教程了。我在下面具体练习的说明中会告诉大家可以参考 SnowSensei 的哪部教学来练习。
 
 ## 单板入门的目标
 
