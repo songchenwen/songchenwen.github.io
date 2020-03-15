@@ -3,6 +3,7 @@ layout: post
 title: 知乎专栏 RSS 输出
 category: Tech
 tags: [Nodejs, RSS]
+redirect_from: "/tech/2015/09/08/zhuanlan-rss/"
 ---
 <figure>
   <a href="/images/zhuanlan-rss/1.jpg"><img style="width:60%" src="/images/zhuanlan-rss/1.thumb.jpg"></a>

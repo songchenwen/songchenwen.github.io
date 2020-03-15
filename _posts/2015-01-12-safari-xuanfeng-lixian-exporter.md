@@ -4,6 +4,7 @@ published: true
 title: Safari 插件 QQ 旋风离线导出至 Aria2
 category: Tech
 tags: [Safari, Aria2, OSX]
+redirect_from: "/tech/2015/01/12/safari-xuanfeng-lixian-exporter/"
 ---
 
 前两天写了一个 Safari 扩展。可以从 QQ旋风 离线空间里导出文件到 Aria2 下载。

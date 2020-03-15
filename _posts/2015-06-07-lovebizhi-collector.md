@@ -6,6 +6,7 @@ tags: [Nodejs, OSX]
 imagefeature: lovebizhi-collector/feature.jpg
 image: 
   thumb: lovebizhi-collector/thumb.jpg
+redirect_from: "/tech/2015/06/07/lovebizhi-collector/"
 ---
 <figure>
   <a href="/images/lovebizhi-collector/1.jpg"><img style="width:40%" src="/images/lovebizhi-collector/1.thumb.jpg"></a>

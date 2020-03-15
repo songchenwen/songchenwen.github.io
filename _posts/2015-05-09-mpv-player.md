@@ -3,6 +3,7 @@ layout: post
 title: 全能高效的播放器 mpv
 category: Tech
 tags: [OSX, Lua]
+redirect_from: "/tech/2015/05/09/mpv-player/"
 ---
 
 最近 iPad 经常被女朋友带走，于是我晚上躺在床上看美剧的设备只好变成了 MacBook Pro。

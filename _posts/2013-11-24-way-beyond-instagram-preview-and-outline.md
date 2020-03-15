@@ -4,6 +4,7 @@ title: 超越 Instagram 之路
 categories : [Tech]
 tags : [Android, Camera, Instagram]
 imagefeature : way-beyond-instagram-preview-and-outline/1.jpg
+redirect_from : "/tech/2013/11/24/way-beyond-instagram-preview-and-outline/"
 ---
 
 在过去一年多的时间里，我和团队受 Instagram 的激励一起做了一个图片分享社区。所以同时我也对 iOS 和 Android 上的相机开发做了很多研究。我们认为我们产品里的相机在很多方面达到了与 Instagram 类似的标准，甚至有些方面要更优于它。

@@ -6,6 +6,7 @@ categories:
 tags: 
   - Heroku
   - Hexo
+redirect_from: "/tech/2014/08/11/hexo-auto-publisher-on-heroku/"
 ---
 
 > 我现在已经不用 Hexo 了。

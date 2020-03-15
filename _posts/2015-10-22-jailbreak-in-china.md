@@ -3,6 +3,7 @@ layout: post
 title: 国内越狱没有社区, 只有庸众
 category: Life
 tags: [iOS, 越狱, FaceTimeAudioEnabler]
+redirect_from: "/life/2015/10/22/jailbreak-in-china/"
 ---
 
 两年前我为了跟女朋友一起用流量打电话，开发了越狱插件 FaceTime Audio Enabler。那时候微信还没有实时语音，所以 FaceTime Audio 成了我的刚需。后来有了微信语音我也就不怎么用这个功能了。

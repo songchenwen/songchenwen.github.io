@@ -3,7 +3,7 @@ layout: post
 title: Sparkles Background
 categories: [Tech]
 tags: [Javascript, 前端]
-
+redirect_from: "/tech/2012/09/05/sparkles-background-javascript/"
 ---
 
 #背景圆球飘动效果的JS

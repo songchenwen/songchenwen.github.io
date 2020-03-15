@@ -3,7 +3,7 @@ layout: post
 title: 那是连风都不曾抵达的地方 那是连太阳都无法温暖的角落
 categories : [Read]
 tags : [卫星, 科普]
-
+redirect_from : "/read/2011/01/27/beyond-wind-and-light/"
 ---
 搬来一篇墙外的文章。
 

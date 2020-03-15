@@ -1,4 +1,4 @@
-permalink:           pretty
+permalink:           /:categories/:title/
 
 # Setup
 title:               宋辰文

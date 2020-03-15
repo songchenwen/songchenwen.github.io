@@ -3,7 +3,7 @@ layout: post
 title: 极简主义设计与独立博客
 categories: [Tech]
 tags: [博客, 极简主义]
-
+redirect_from: "/tech/2011/02/19/minimalism-and-blog/"
 ---
 
 极简主义是一种生活态度，倡导简约整洁优雅的感官体验。在设计上倾向于以极少的元素辅以大面积留白，从而使内容重点得以强调突出，优雅地传达出设计师的感情。

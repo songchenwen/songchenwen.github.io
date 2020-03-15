@@ -3,6 +3,7 @@ layout: post
 title: SSL Labs 评分 A+ 的 nginx 配置
 category: Tech
 tags: [nginx, Https]
+redirect_from: "/tech/2015/09/09/nginx-configuration-with-ssl-labs-class-a-plus/"
 ---
 
 可惜[我的博客](http://songchenwen.com)并不支持 https，这是因为 GitHub Pages 和 GitCafe Pages 都不支持在自定义域名上使用 https 访问。

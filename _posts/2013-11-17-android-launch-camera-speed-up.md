@@ -6,7 +6,7 @@ categories :
 tags : 
 - Android
 - Camera
-
+redirect_from : "/tech/2013/11/17/android-launch-camera-speed-up/"
 ---
 在 Android 上实现一个简单能用的相机其实挺容易。谷歌随便搜一搜就有很多能用的 Sample。当然就像谷歌能搜到的其他代码一样，这些 Sample 虽然能用但离好用还很远。
 

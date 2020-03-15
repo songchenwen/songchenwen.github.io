@@ -6,6 +6,7 @@ categories :
 tags : 
   - Android
   - Https
+redirect_from: "/tech/2015/01/28/android-trust-self-signed-ssl-certificate/"
 ---
 
 Android 4.0 之后增加了添加可信证书的 API 。但对于我们 App 开发者来说，毕竟还是要支持 4.0 之前版本的 Android 的。所以我们要想一些其它的办法来使我们的 App 信任我们自己的自签名证书。

@@ -5,6 +5,7 @@ category: Tech
 tags: [iOS, 越狱, FaceTimeAudioEnabler]
 image: 
   thumb: facetime-audio-enabler-test/1.jpg
+redirect_from: "/tech/2015/10/21/facetime-audio-enabler-test/"
 ---
 
 > 测试已结束，已上线 BigBoss，测试源已移除。

@@ -3,7 +3,7 @@ layout: post
 title: 悲剧才隽永
 categories : [Read]
 tags : [我可能不会爱你, 电视剧]
-
+redirect_from : "/read/2011/10/12/tragedy-lasts/"
 ---
 
 『我不是故意的，请不要再哭了。我这支铅笔要送给你，我只削过一次哦。我真的不是故意害你跌倒的，对不起啦。』

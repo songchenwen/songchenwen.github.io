@@ -9,6 +9,7 @@ tags:
   - iOS
   - VPS
 published: true
+redirect_from: "/tech/2014/10/13/cross-fire-wall-on-ios8/"
 ---
 
 > iOS8 为我们带来了第三方输入法和 App Extentions，越狱的需求越来越少。而且自从在 [Bither] 里存了一些比特币之后，我就越来越关注手机系统的安全性。现在真的是能不越狱就尽量不越了。那么不越狱的话怎么满足我自由的访问互联网的需求呢？
