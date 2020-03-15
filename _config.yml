@@ -21,6 +21,7 @@ owner:
   github:            songchenwen
   stackoverflow:     https://stackoverflow.com/users/2210682/songchenwen
   stackoverflowid:   2210682
+  wechat:            宋大明白
 
 disqus_shortname: garyblog
 tencent_stats: 50751360
@@ -50,6 +51,8 @@ links:
     url: /categories/
   - title: Tags
     url: /tags/
+
+plugins: [jekyll-paginate, jekyll-redirect-from]
 
 defaults:
   - scope:

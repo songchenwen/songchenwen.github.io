@@ -3,6 +3,7 @@ layout: post
 title: 搭配 Let's Encrypt 半自动化为 nginx 配置 https
 category: Tech
 tags: [nginx, Https, letsencrypt]
+redirect_from: "/tech/2016/01/21/nginx-ssl-config-with-letsencrypt/"
 ---
 
 有了 [Let's Encrypt]，配置 SSL 证书再也不是难事，只是 [Let's Encrypt] 目前还处在很初期的阶段，对 [nginx] 的自动化配置支持的还不好。不过我们完全可以自己写点小脚本来半自动化配置我们自己的 [nginx] 服务器。
