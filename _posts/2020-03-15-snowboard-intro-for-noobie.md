@@ -219,7 +219,7 @@ https://www.youtube.com/watch?v=muHpimpiIT4)([B站](https://www.bilibili.com/vid
 
 做到这一步我们的单板滑雪就算入门了。
 
-后续需要做的是不断的刷在雪时长和公里数，练习控制 S 弯的弯形和大小，并逐渐减少搓雪增加走刃。等你把初级和中级雪道都练的能用 S 弯无压力的走完之后，你应该就能知道自己下一步想要进阶的方向了。
+后续需要做的是不断的刷在雪时长和公里数，练习控制 S 弯的弯形和大小，并逐渐减少搓雪增加走刃，这时候可以用[滑呗](https://api.fenxuekeji.com/h5/mogul_react/register?from_share=1&user_id=988aff24-d639-4459-925e-7e9feca14b58)来记录里程数。等你把初级和中级雪道都练的能用 S 弯无压力的走完之后，你应该就能知道自己下一步想要进阶的方向了。
 
 [单板滑雪]:/categories/#Snowboard
 [^1]: [这个雪季想认真学单板，北京或者崇礼哪个雪场的教练靠谱？ - OneJump的回答 - 知乎](https://www.zhihu.com/question/65917055/answer/236488300)
