@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 小白的单板滑雪保姆级入坑指引
+title: 小白的单板滑雪保姆级入门教程
 category: Snowboard
 tags: [Snowboard,单板,滑雪]
 imagefeature: snowboard-intro-for-noobie/feature.jpg
