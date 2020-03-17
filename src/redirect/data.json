@@ -1,0 +1,66 @@
+[
+  {
+    "path": "/cross-fire-wall-on-ios8",
+    "redirect_from": ["/tech/2014/10/13/cross-fire-wall-on-ios8/", "/tech/cross-fire-wall-on-ios8/"]
+  },
+  {
+    "path": "/nginx-ssl-config-with-letsencrypt",
+    "redirect_from": ["/tech/2016/01/20/nginx-ssl-config-with-letsencrypt/", "/tech/nginx-ssl-config-with-letsencrypt/"]
+  },
+  {
+    "path": "/jailbreak-in-china",
+    "redirect_from": ["/life/2015/10/22/jailbreak-in-china/", "/life/jailbreak-in-china/"]
+  },
+  {
+    "path": "/facetime-audio-enabler-test",
+    "redirect_from": ["/tech/2015/10/21/facetime-audio-enabler-test/", "/tech/facetime-audio-enabler-test/"]
+  },
+  {
+    "path": "/nginx-configuration-with-ssl-labs-class-a-plus",
+    "redirect_from": ["/tech/2015/09/09/nginx-configuration-with-ssl-labs-class-a-plus/", "/tech/nginx-configuration-with-ssl-labs-class-a-plus/"]
+  },
+  {
+    "path": "/zhuanlan-rss",
+    "redirect_from": ["/tech/2015/09/08/zhuanlan-rss/", "/tech/zhuanlan-rss/"]
+  },
+  {
+    "path": "/lovebizhi-collector",
+    "redirect_from": ["/tech/2015/06/07/lovebizhi-collector/", "/tech/lovebizhi-collector/"]
+  },
+  {
+    "path": "/pgp-mail-on-osx",
+    "redirect_from": ["/tech/2015/05/20/pgp-mail-on-osx/", "/tech/pgp-mail-on-osx/"]
+  },
+  {
+    "path": "/mpv-player",
+    "redirect_from": ["/tech/2015/05/09/mpv-player/", "/tech/mpv-player/"]
+  },
+  {
+    "path": "/maid-hazel-for-hackers",
+    "redirect_from": ["/tech/2015/04/23/maid-hazel-for-hackers/", "/tech/maid-hazel-for-hackers/"]
+  },
+  {
+    "path": "/hammerspoon-mac-window-manager",
+    "redirect_from": ["/tech/2015/04/02/hammerspoon-mac-window-manager/", "/tech/hammerspoon-mac-window-manager/"]
+  },
+  {
+    "path": "/pac-airdrop-conflict",
+    "redirect_from": ["/tech/2015/03/22/pac-airdrop-conflict/", "/tech/pac-airdrop-conflict/"]
+  },
+  {
+    "path": "/android-2-ios-strings-workflow",
+    "redirect_from": ["/tech/2015/01/28/android-trust-self-signed-ssl-certificate/", "/tech/android-trust-self-signed-ssl-certificate/"]
+  },
+  {
+    "path": "/android-trust-self-signed-ssl-certificate",
+    "redirect_from": ["/tech/2015/06/07/lovebizhi-collector/", "/tech/lovebizhi-collector/"]
+  },
+  {
+    "path": "/snowboard-intro-for-noobie",
+    "redirect_from": ["/snowboard/snowboard-intro-for-noobie"]
+  },
+  {
+    "path": "/wuhan-locked-down-earlier",
+    "redirect_from": ["/life/wuhan-locked-down-earlier/"]
+  }
+]

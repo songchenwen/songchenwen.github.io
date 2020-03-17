@@ -1,0 +1,8 @@
+name: 宋辰文
+bio: |
+  关于技术, 时事, 潜水, 滑雪
+avatar: ./avatars/scw.jpg
+social:
+  - url: https://stackoverflow.com/users/2210682/songchenwen
+  - url: https://github.com/songchenwen
+featured: true

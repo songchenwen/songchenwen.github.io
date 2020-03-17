@@ -1,1 +1,8 @@
 _site
+public
+package-lock.json
+yarn.lock
+.cache
+node_modules
+.output
+.env
