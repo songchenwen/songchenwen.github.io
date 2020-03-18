@@ -51,7 +51,8 @@ const RepoStatus: React.FC<RepoStatusProps> = ({ url, fill = '#73737D'}) => {
   const [iconColor, setIconColor] = useState(fill)
   const [linkTitle, setLinkTitle] = useState(repo.user)
   const [animationStyle, setAnimation] = useState("")
-  useInterval(() => {
+
+  const updateStatus = () => {
     fetch(buildStatusURL)
     .then(response => response.json()) // parse JSON from request
     .then(resultData => {
@@ -76,7 +77,9 @@ const RepoStatus: React.FC<RepoStatusProps> = ({ url, fill = '#73737D'}) => {
         }
       }
     })
-  }, 15 * 1000)
+  }
+  useInterval(updateStatus, 15 * 1000)
+  useEffect(updateStatus, [])
   return (
     <RepoStatusContent key={githubUserURL} target="_blank" href={githubUserURL} title={linkTitle} style={{animation: animationStyle}}>
        <Github fill={iconColor} />
