@@ -40,7 +40,7 @@ const RepoStatus: React.FC<RepoStatusProps> = ({ url, fill = '#73737D'}) => {
   var repo = splitUrl(url)
   if (!repo) {
     return (
-      <RepoStatusContent key={url} href={url} target="_blank" title="Github">
+      <RepoStatusContent rel="noopener nofollow" key={url} href={url} target="_blank" title="Github">
          <Github fill={fill} />
       </RepoStatusContent>
     );
@@ -81,7 +81,7 @@ const RepoStatus: React.FC<RepoStatusProps> = ({ url, fill = '#73737D'}) => {
   useInterval(updateStatus, 15 * 1000)
   useEffect(updateStatus, [])
   return (
-    <RepoStatusContent key={githubUserURL} target="_blank" href={githubUserURL} title={linkTitle} style={{animation: animationStyle}}>
+    <RepoStatusContent rel="noopener nofollow" key={githubUserURL} target="_blank" href={githubUserURL} title={linkTitle} style={{animation: animationStyle}}>
        <Github fill={iconColor} />
     </RepoStatusContent>
   );
