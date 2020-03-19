@@ -87,6 +87,6 @@ module.exports = {
         theme_color_in_head: false,
       },
     },
-    "gatsby-plugin-offline",
+    "gatsby-plugin-remove-serviceworker",
   ],
 };

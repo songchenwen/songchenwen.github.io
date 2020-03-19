@@ -19,7 +19,7 @@
     "gatsby-plugin-html-attributes": "^1.0.5",
     "gatsby-plugin-manifest": "^2.2.4",
     "gatsby-plugin-meta-redirect": "^1.1.1",
-    "gatsby-plugin-offline": "^3.0.41",
+    "gatsby-plugin-remove-serviceworker": "^1.0.0",
     "gatsby-source-contentful": "^2.1.98",
     "javascript-time-ago": "^2.0.7",
     "react": "^16.8.6",
