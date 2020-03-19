@@ -3,7 +3,6 @@ import { Disqus, CommentCount } from 'gatsby-plugin-disqus'
 import React, { useState } from "react";
 
 import Section from "@components/Section";
-import Headings from "@components/Headings";
 
 import styled from "@emotion/styled";
 import mediaqueries from "@styles/media";

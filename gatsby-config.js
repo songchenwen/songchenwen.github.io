@@ -69,6 +69,12 @@ module.exports = {
       },
     },
     {
+      resolve: 'gatsby-plugin-html-attributes',
+      options: {
+        lang: 'zh'
+      }
+    },
+    {
       resolve: `gatsby-plugin-manifest`,
       options: {
         name: `宋辰文`,

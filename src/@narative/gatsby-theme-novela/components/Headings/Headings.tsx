@@ -1,108 +1,37 @@
 import styled from "@emotion/styled";
-import { css } from "@emotion/core";
+import Headings from "@narative/gatsby-theme-novela/src/components/Headings/Headings";
 
-import mediaqueries from "@styles/media";
+console.log("Headings.h1")
+console.log(Headings.h1)
 
-/**
- * Example:
- * <Heading.h1>Lorem Ipsum</Heading.h1>
- */
-
-const commonStyles = p => css`
-  font-weight: bold;
-  color: ${p.theme.colors.primary};
-  font-family: ${p.theme.fonts.serif};
-`;
-
-const h1 = styled.h1`
-  word- wrap: break-word;
+const h1 = styled(Headings.h1)`
+  word-wrap: break-word;
   word-break: break-all;
-  font-size: 52px;
-  line-height: 1.15;
-  ${commonStyles};
-
-  ${mediaqueries.desktop`
-    font-size: 38px;
-    line-height: 1.2;
-  `};
-
-  ${mediaqueries.phablet`
-    font-size: 32px;
-    line-height: 1.3;
-  `};
 `;
 
-const h2 = styled.h2`
-  word- wrap: break-word;
+const h2 = styled(Headings.h2)`
+  word-wrap: break-word;
   word-break: break-all;
-  font-size: 32px;
-  line-height: 1.333;
-  ${commonStyles};
-
-  ${mediaqueries.desktop`
-    font-size: 21px;
-  `};
-
-  ${mediaqueries.tablet`
-    font-size: 24px;
-    line-height: 1.45;
-  `};
-
-  ${mediaqueries.phablet`
-    font-size: 22px;
-  `};
 `;
 
-const h3 = styled.h3`
-  word- wrap: break-word;
+const h3 = styled(Headings.h3)`
+  word-wrap: break-word;
   word-break: break-all;
-  font-size: 24px;
-  line-height: 1.45;
-  ${commonStyles};
-
-  ${mediaqueries.tablet`
-    font-size: 22px;
-  `};
-
-  ${mediaqueries.phablet`
-    font-size: 20px;
-  `};
 `;
 
-const h4 = styled.h4`
-  word- wrap: break-word;
+const h4 = styled(Headings.h4)`
+  word-wrap: break-word;
   word-break: break-all;
-  font-size: 18px;
-  line-height: 1.45;
-  ${commonStyles};
-
-  ${mediaqueries.phablet`
-    font-size: 16px;
-  `};
 `;
 
-const h5 = styled.h5`
-  word- wrap: break-word;
-  word-break: break-all;  
-  font-size: 18px;
-  line-height: 1.45;
-  ${commonStyles};
-
-  ${mediaqueries.phablet`
-    font-size: 16px;
-  `};
-`;
-
-const h6 = styled.h6`
-  word- wrap: break-word;
+const h5 = styled(Headings.h5)`
+  word-wrap: break-word;
   word-break: break-all;
-  font-size: 16px;
-  line-height: 1.45;
-  ${commonStyles};
+`;
 
-  ${mediaqueries.phablet`
-    font-size: 14px;
-  `};
+const h6 = styled(Headings.h6)`
+  word-wrap: break-word;
+  word-break: break-all;
 `;
 
 export default {
