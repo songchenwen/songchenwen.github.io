@@ -1,9 +1,6 @@
 import styled from "@emotion/styled";
 import Headings from "@narative/gatsby-theme-novela/src/components/Headings/Headings";
 
-console.log("Headings.h1")
-console.log(Headings.h1)
-
 const h1 = styled(Headings.h1)`
   word-wrap: break-word;
   word-break: break-all;
