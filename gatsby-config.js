@@ -63,6 +63,12 @@ module.exports = {
       }
     },
     {
+      resolve: `gatsby-plugin-google-analytics`,
+      options: {
+        trackingId: "UA-161230431-1",
+      },
+    },
+    {
       resolve: `gatsby-plugin-manifest`,
       options: {
         name: `宋辰文`,
