@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import mediaqueries from '@styles/media';
+import { useStaticQuery, graphql } from 'gatsby';
 
 import Icons from '@icons';
 
@@ -18,6 +19,15 @@ const Github = Icons.Github
 
 const failingColor = "#ff0000"
 const buildingColor = "#ffff00"
+const updateColor = "#0000ff"
+
+const buildTimeQuery = graphql`
+query BuildTimeQuery {
+  site {
+    buildTime
+  }
+}
+`;
 
 function useInterval(callback, delay) {
   const savedCallback = useRef();
@@ -45,7 +55,9 @@ const RepoStatus: React.FC<RepoStatusProps> = ({ url, fill = '#73737D'}) => {
       </RepoStatusContent>
     );
   }
-  var githubUserURL = "https://github.com/" + repo.user;
+  const buildTimeData = useStaticQuery(buildTimeQuery)
+  const buildTime = Date.parse(buildTimeData.site.buildTime)
+  const githubUserURL = "https://github.com/" + repo.user;
   const buildStatusURL = "https://api.github.com/repos/" + repo.user + "/" + repo.repo + "/actions/workflows/build.yml/runs?per_page=1"
   const pulseAnimation = "pulse 2s ease-in-out infinite"
   const [iconColor, setIconColor] = useState(fill)
@@ -59,17 +71,25 @@ const RepoStatus: React.FC<RepoStatusProps> = ({ url, fill = '#73737D'}) => {
       if (resultData.workflow_runs) {
         const status = resultData.workflow_runs[0].status
         const conclusion = resultData.workflow_runs[0].conclusion
+        const createdAt = Date.parse(resultData.workflow_runs[0].created_at)
         const updatedAt = resultData.workflow_runs[0].updated_at
       
         if (status == "completed"){
-          setLinkTitle("Build " + conclusion + " since " + timeAgo.format(Date.parse(updatedAt)))
+          var title = "Build " + conclusion + " since " + timeAgo.format(Date.parse(updatedAt))
           if (conclusion == "success") {
-            setIconColor(fill)
-            setAnimation("")
+            if (buildTime < createdAt) {
+              setIconColor(updateColor)
+              setAnimation(pulseAnimation)
+              title = "Update available since " + timeAgo.format(Date.parse(updatedAt))
+            } else {
+              setIconColor(fill)
+              setAnimation("")
+            }
           } else {
             setIconColor(failingColor)
             setAnimation(pulseAnimation)
           }
+          setLinkTitle(title)
         } else {
           setLinkTitle("Build " + status + " since " + timeAgo.format(Date.parse(updatedAt)))
           setIconColor(buildingColor)
