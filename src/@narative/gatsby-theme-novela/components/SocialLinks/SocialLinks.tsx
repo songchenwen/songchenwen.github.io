@@ -1,10 +1,12 @@
 import React from 'react';
 import styled from '@emotion/styled';
-
-import Icons from '@icons';
 import mediaqueries from '@styles/media';
+
 import MyIcons from '../../../../icons';
 import RepoStatus from '@components/RepoStatus';
+const Origin = require("@narative/gatsby-theme-novela/src/components/SocialLinks/SocialLinks");
+
+const OriginSocialLinks = Origin.default
 
 interface SocialLinksProps {
   links: {
@@ -15,21 +17,6 @@ interface SocialLinksProps {
 }
 
 const icons = {
-  behance: Icons.Behance,
-  dribbble: Icons.Dribbble,
-  linkedin: Icons.LinkedIn,
-  twitter: Icons.Twitter,
-  facebook: Icons.Facebook,
-  instagram: Icons.Instagram,
-  devto: Icons.DevTo,
-  github: Icons.Github,
-  stackoverflow: Icons.Stackoverflow,
-  youtube: Icons.YouTube,
-  medium: Icons.Medium,
-  unsplash: Icons.Unsplash,
-  patreon: Icons.Patreon,
-  paypal: Icons.Paypal,
-  digitalocean: Icons.DigitalOcean,
   wechat: MyIcons.WeChat,
   weibo: MyIcons.Weibo,
 };
@@ -38,25 +25,28 @@ const getHostname = url => {
   return new URL(url.toLowerCase()).hostname.replace('www.', '').split('.')[0];
 };
 
+const filterLinks = ({name}) => {
+  return name == "github" || icons[name]
+}
+
 const SocialLinks: React.FC<SocialLinksProps> = ({
   links,
   fill = '#73737D'
 }) => {
   if (!links) return null;
+  const extraLinks = links.filter(filterLinks)
+  const originLinks = links.filter(({name}) => { return !filterLinks({name}) })
 
   return (
     <>
-      
-      {links.map(option => {
+      {extraLinks.map(option => {
         const name = option.name || getHostname(option.url);
         if (name == "github") {
           return (<RepoStatus url={option.url} fill={fill} />)
         }
         const Icon = icons[name];
         if (!Icon) {
-          throw new Error(
-            `unsupported social link name=${name} / url=${option.url}`,
-          );
+          return null;
         }
         return (
           <SocialIconContainer
@@ -72,6 +62,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
           </SocialIconContainer>
         );
       })}
+      <OriginSocialLinks links={originLinks} />
     </>
   );
 };
