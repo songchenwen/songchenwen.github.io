@@ -17,7 +17,7 @@ module.exports = {
       },
       {
         name: `wechat`,
-        url: `/wechat/`,
+        url: `https://mp.weixin.qq.com/s?__biz=MzAxNTI3MTUwMA==&mid=2247483701&idx=2&sn=34613cbb3252ac5eb6c31724f3109b59`,
       },
       {
         name: `weibo`,
