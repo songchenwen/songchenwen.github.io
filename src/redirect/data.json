@@ -62,5 +62,13 @@
   {
     "path": "/wuhan-locked-down-earlier",
     "redirect_from": ["/life/wuhan-locked-down-earlier/"]
+  },
+  {
+    "path": "https://t.cn/A6wLoYfO",
+    "redirect_from": ["/airport"]
+  },
+  {
+    "path": "https://github.com/songchenwen/nanopi-r2s",
+    "redirect_from": ["/nanopi-r2s-roms-redir"]
   }
 ]
