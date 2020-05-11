@@ -72,7 +72,7 @@
     "redirect_from": ["/nanopi-r2s-roms-redir"]
   },
   {
-    "path": "https://mega.nz/file/jxsUHayA#u_5g3WLrxgFZXyXkdVlCh3ExEn8Z4RPBRBcdqJHQUI4",
+    "path": "/api/fileshare/pxe_install.zip",
     "redirect_from": ["/install-os-via-nas/pxe_install.zip"]
   }
 ]
