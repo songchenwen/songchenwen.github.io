@@ -3,6 +3,11 @@
         {
             "src": "/airport", 
             "dest": "/api/airport"
+        },
+        {
+            "src": "/nanopi-r2s-opkg-feeds/(.*)",
+            "status": 301,
+            "headers": { "Location": "https://nanopi-r2s-opkg-feeds.songchenwen.com/$1" }
         }
     ]
 }
