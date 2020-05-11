@@ -6,8 +6,8 @@ name: build
 # events but only for the master branch
 on:
   # repository_dispatch:
-  # push:
-  #   branches: [ src ]
+  push:
+    branches: [ no-such-branch ]
   
 
 jobs:
