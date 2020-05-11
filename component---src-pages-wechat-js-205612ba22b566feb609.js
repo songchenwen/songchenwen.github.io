@@ -1,0 +1,2 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[7],{eTFQ:function(t,e,n){"use strict";n.r(e);n("q1tI");var a=n("dH/O"),c=n("noox"),d=n("gZs9"),o=n("qKvR");e.default=function(){return Object(o.d)(a.a,null,Object(o.d)(c.a,null,Object(o.d)("div",{style:{marginTop:"100px","text-align":"center"}},Object(o.d)(d.a.h1,null,"扫码关注我的微信公众号"),Object(o.d)("img",{src:"/img/wechat.jpg",alt:"QR Code",style:{paddingBottom:"300px",marginTop:"100px"}}))))}}}]);
+//# sourceMappingURL=component---src-pages-wechat-js-205612ba22b566feb609.js.map
