@@ -98,8 +98,10 @@ const RepoStatus: React.FC<RepoStatusProps> = ({ url, fill = '#73737D'}) => {
       }
     })
   }
-  useInterval(updateStatus, 15 * 1000)
-  useEffect(updateStatus, [])
+  if (process.env.GITHUB_WORKFLOW) {
+    useInterval(updateStatus, 15 * 1000)
+    useEffect(updateStatus, [])
+  }
   return (
     <RepoStatusContent rel="noopener nofollow" key={githubUserURL} target="_blank" href={githubUserURL} title={linkTitle} style={{animation: animationStyle}}>
        <Github fill={iconColor} />
