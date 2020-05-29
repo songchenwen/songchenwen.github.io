@@ -97,7 +97,7 @@ const SEO: React.FC<HelmetProps> = ({
   const linkedin = site.social.find(option => option.name === 'linkedin') || {};
   const medium = site.social.find(option => option.name === 'medium') || {};
 
-  const pageUrl = site.siteUrl + pathname
+  const pageUrl = pathname
 
   const fullURL = (path: string) =>
     path ? `${path}` : site.siteUrl;
