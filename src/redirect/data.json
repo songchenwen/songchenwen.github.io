@@ -74,5 +74,9 @@
   {
     "path": "/api/fileshare/pxe_install.zip",
     "redirect_from": ["/install-os-via-nas/pxe_install.zip"]
+  },
+  {
+    "path": "https://api.fenxuekeji.com/h5/mogul_react/join_club?club_id=8bc40b3c-3a7e-4349-815a-d5213105d4d0&user_id=988aff24-d639-4459-925e-7e9feca14b58&from_share=true",
+    "redirect_from": ["/snowboard/starclub/huabei"]
   }
 ]
